@@ -1,0 +1,123 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #f4f4f9;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+h1 {
+  color: #005b96;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-box input {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 60px;
+}
+
+.search-box button {
+  padding: 9px 15px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.search-box button:disabled {
+  background-color: #aaa;
+}
+
+.search-box button:hover:not(:disabled) {
+  background-color: #0056b3;
+}
+
+hr {
+  border: none;
+  border-top: 1px solid #eee;
+  margin: 20px 0;
+}
+
+.result-area {
+  margin-top: 20px;
+}
+
+.error-message {
+  color: #d9534f;
+  font-weight: bold;
+}
+
+.ayah-display {
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background-color: #fdfdfd;
+}
+
+.arabic-text {
+  font-family: 'Times New Roman', Times, serif; /* Font yg lebih baik untuk Arab */
+  font-size: 2em;
+  text-align: right;
+  direction: rtl;
+  color: #000;
+}
+
+
+.voice-button {
+  padding: 9px 15px;
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  margin-left: 10px;
+}
+
+.voice-button:disabled {
+  background-color: #aaa;
+}
+
+.voice-button:hover:not(:disabled) {
+  background-color: #c9302c;
+}
+
+.ayah-display-short {
+  padding: 10px 15px;
+  border: 1px solid #eee;
+  border-radius: 4px;
+  background-color: #fafafa;
+  margin-bottom: 10px;
+}
+
+.ayah-display-short h4 {
+  margin-top: 0;
+}
+
+.ayah-display-short.clickable {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.ayah-display-short.clickable:hover {
+  background-color: #e9e9e9; /* Warna sedikit abu saat hover */
+}

@@ -1,0 +1,17 @@
+# Python virtual environment
+backend/venv/
+
+# Python cache
+backend/__pycache__/
+backend/*.pyc
+
+# Node.js dependencies (sangat besar!)
+frontend-react/node_modules/
+
+# Vite build output and cache
+frontend-react/dist/
+frontend-react/.vite/
+
+# OS generated files
+.DS_Store
+Thumbs.db
