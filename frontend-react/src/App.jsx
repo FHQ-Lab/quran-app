@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import './App.css'; //buat file CSS
 import Highlight from './Highlight.jsx'; 
+import Chatbot from './Chatbot.jsx'; // <--- IMPORT BARU
+import './Chatbot.css'; // <--- IMPORT CSS BARU
 // =======================================================
 // !!! BAGIAN INI HILANG DARI KODE KAMU !!!
 // Kamu perlu mendefinisikan 'recognition' DI LUAR komponen
@@ -33,6 +35,8 @@ function App() {
   const [multipleResults, setMultipleResults] = useState([]);
   // State untuk Highlight search
   const [spokenQuery, setSpokenQuery] = useState("");
+  //Chatbot
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   // == FUNGSI FETCHING ==
   // Fungsi ini akan dipanggil saat tombol "Cari" diklik
@@ -270,6 +274,16 @@ const handleSearch = async () => {
       )}
       {/* ======================================= */}
       </div>
+      {/* --- Tombol untuk membuka Chatbot --- */}
+      <button 
+        className="chat-toggle-btn" 
+        onClick={() => setIsChatOpen(!isChatOpen)}
+      >
+        🤖
+      </button>
+
+      {/* --- Jendela Chatbot (muncul jika isChatOpen true) --- */}
+      {isChatOpen && <Chatbot onClose={() => setIsChatOpen(false)} />}
     </div>
   );
 }

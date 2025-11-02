@@ -392,3 +392,35 @@ def search_by_text(request: VoiceSearchRequest):
             "match_type": "multiple",
             "results": matches
         }
+    
+# === ENDPOINT BARU UNTUK CHATBOT (KONTEKS AL-MULK) ===
+@app.post("/chatbot")
+def handle_chatbot_message(request: VoiceSearchRequest):
+    user_message = request.text.lower()
+
+    # --- LOGIKA BOT SEDERHANA (Rule-Based) ---
+    # Kita cari angka pertama yang ada di dalam pesan
+    match = re.search(r'\d+', user_message)
+
+    if match:
+        # Jika angka ditemukan (misal "tafsir ayat 5")
+        try:
+            ayah_number = int(match.group(0)) # Ambil angkanya (misal: 5)
+
+            # --- KONTEKS SPESIFIK: SURAT AL-MULK (67) ---
+            if ayah_number < 1 or ayah_number > 30:
+                raise HTTPException(status_code=404, detail="Saya hanya bisa mencari ayat 1-30 untuk Surat Al-Mulk.")
+
+            # Panggil fungsi yang SUDAH ADA. Ini kerennya! Kita pakai ulang kode.
+            print(f"INFO: Chatbot mencari Al-Mulk (67) ayat {ayah_number}")
+            return get_spesific_ayah(surah_number=67, ayah_number=ayah_number)
+
+        except HTTPException as e:
+            # Ini terjadi jika get_spesific_ayah gagal
+            raise e
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Terjadi error internal: {e}")
+
+    else:
+        # Jika tidak ada angka dalam pesan
+        raise HTTPException(status_code=400, detail="Maaf, saya tidak mengerti. Coba sebutkan nomor ayatnya. (Contoh: 'Apa tafsir ayat 3?')")
