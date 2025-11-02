@@ -77,6 +77,9 @@ def build_index():
                 try:
                     ayah_number = verse["number"]["inSurah"]
                     arabic_text_original = verse["text"]["arab"]
+
+                    translation_text = verse["translation"]["id"]
+                    tafsir_text = verse["tafsir"]["id"]["long"] # Ambil tafsir Kemenag
                     
                     # Normalisasi teks Arab
                     normalized_text = normalize_arabic(arabic_text_original)
@@ -86,12 +89,15 @@ def build_index():
                         "surah": surah_number,
                         "ayah": ayah_number,
                         "text_normalized": normalized_text, # <-- Teks bersih untuk dicari
-                        "text_arab": arabic_text_original # <-- Teks asli untuk ditampilkan
+                        "text_arab": arabic_text_original, # <-- Teks asli untuk ditampilkan
+                        "translation": translation_text, # <-- FIELD BARU
+                        "tafsir": tafsir_text       # <-- FIELD BARU
                     })
                 except KeyError as e:
-                    print(f"\nError parsing ayat: {e} di Surah {surah_number}")
+                # Ini untuk menangani jika ada ayat yang tidak punya tafsir/terjemahan
+                    print(f"\nError parsing data (KeyError): {e} di Surah {surah_number}, Ayat {verse.get('number', {}).get('inSurah', '?')}")
                 except Exception as e:
-                    print(f"\nError tidak diketahui: {e}")
+                    print(f"\nError tidak diketahui saat memproses ayat: {e}")
 
             print(f" SELESAI ({len(verses)} ayat diproses)")
             
