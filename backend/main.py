@@ -48,6 +48,46 @@ except Exception as e:
     print(f"!!! ERROR FATAL: Gagal memuat {SEARCH_INDEX_FILE}: {e} !!!")
 # =======================================================
 
+# === Muat Peta Nama Surah ===
+SURAH_NAME_TO_NUMBER = {}
+SURAH_NUMBER_TO_NAME = {}
+try:
+    print("INFO:    Mengambil data peta Surah...")
+    response = requests.get(f"{QURAN_API_BASE_URL}/surah")
+    response.raise_for_status()
+    surahs_data = response.json().get("data", [])
+    
+    for surah in surahs_data:
+        # 1. Ambil nomor
+        number = surah["number"]
+        
+        # 2. Siapkan nama yang bagus untuk ditampilkan
+        SURAH_NUMBER_TO_NAME[number] = surah["name"]["transliteration"]["id"]
+        
+        # 3. Buat daftar semua kemungkinan alias nama
+        names_to_add = [
+            surah["name"]["transliteration"]["id"].lower(), # misal: "al-fatihah"
+            surah["name"]["short"].lower(),                 # misal: "al-fatihah"
+            surah["name"]["translation"]["id"].lower()      # misal: "pembukaan"
+        ]
+        
+        # 4. Tambahkan semua alias (termasuk yang dinormalisasi) ke peta
+        for name in names_to_add:
+            if name:
+                # Tambahkan versi asli (misal: "al-fatihah")
+                SURAH_NAME_TO_NUMBER[name] = number
+                
+                # Tambahkan versi normalisasi (misal: "alfatihah")
+                norm_name = name.replace("-", "").replace(" ", "")
+                SURAH_NAME_TO_NUMBER[norm_name] = number
+
+
+    print(f"INFO:    Berhasil memuat {len(SURAH_NAME_TO_NUMBER)} alias nama Surah.")
+
+except Exception as e:
+    print(f"!!! ERROR FATAL: Gagal memuat peta nama Surah: {e} !!!")
+# =======================================================
+
 def normalize_arabic(text: str) -> str:
     """
     Fungsi Normalisasi Master BARU.
@@ -79,6 +119,16 @@ def normalize_arabic(text: str) -> str:
     except Exception as e:
         print(f"Error normalisasi teks: {e}")
         return text
+    
+def get_surah_number_from_name(name: str) -> int | None:
+    """Mengubah string nama surah menjadi nomor surah."""
+    # Normalisasi input (lowercase, hapus strip, hapus spasi)
+    query = name.lower().strip().replace("-", "").replace(" ", "")
+    
+    # Langsung cek di peta kita yang sudah pintar
+    return SURAH_NAME_TO_NUMBER.get(query)
+        
+    # return None # Tidak ditemukan
 
 # Endpoint pertama: mendapatkan detail ayat sepsifik
 @app.get("/surah/{surah_number}/{ayah_number}")
@@ -98,8 +148,166 @@ def get_spesific_ayah(surah_number: int, ayah_number: int):
     except requests.exceptions.RequestException as e:
         #Jika gagal, akan terkirim pesan error yang jelas
         raise HTTPException(status_code=404, detail=f"Gagal mengambil data atau data tidak ditemukan: {e}")
+
+# === ENDPOINT GLOBAL BARU (VERSI UPGRADE) ===
+@app.get("/search")
+def search_global(q: str):
+    """
+    Endpoint "Otak" yang menangani semua jenis pencarian.
+    - Pola "Surah 2 Ayat 255"
+    - Pola "2:255" atau "2 255"
+    - Pola "al-baqarah:255" atau "al baqarah 255"
+    - Pola "Surah Al-Mulk"
+    - Pola "sabar" (teks Indo)
+    - Pola "بسم الله" (teks Arab)
+    """
+    query = q.strip()
     
-    # === ENDPOINT BARU UNTUK VOICE SEARCH ===
+    # === Pola 1: Pencarian Ayat Spesifik (di-upgrade) ===
+    
+    # Pola A: "Surah 2 Ayat 255" (Natural Language)
+    # re.IGNORECASE membuatnya tidak peduli huruf besar/kecil
+    match_natural = re.match(r'^(surah|surat)\s+(\d+)\s+(ayat)\s+(\d+)$', query, re.IGNORECASE)
+    if match_natural:
+        try:
+            surah_number = int(match_natural.group(2)) # Ambil angka surah
+            ayah_number = int(match_natural.group(4))  # Ambil angka ayat
+            print(f"INFO: Pola 1A (Natural) terdeteksi: {surah_number}:{ayah_number}")
+            return get_spesific_ayah(surah_number, ayah_number)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error mengambil ayat: {e}")
+
+    # Pola B: "2:255" atau "2 255" (Hanya Angka)
+    # [:\s]+ artinya separator bisa berupa ":" atau spasi (atau keduanya)
+    match_num_num = re.match(r'^(\d+)[:\s]+(\d+)$', query)
+    if match_num_num:
+        try:
+            surah_number = int(match_num_num.group(1))
+            ayah_number = int(match_num_num.group(2))
+            print(f"INFO: Pola 1B (Num-Num) terdeteksi: {surah_number}:{ayah_number}")
+            return get_spesific_ayah(surah_number, ayah_number)
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Error mengambil ayat: {e}")
+
+    # Pola C: "al-fatihah:7" atau "al fatihah 7" (Nama Surah + Angka)
+    match_name_num = re.match(r'^(.*?)[:\s]+(\d+)$', query)
+    if match_name_num:
+        surah_part = match_name_num.group(1).strip()
+        ayah_part = int(match_name_num.group(2))
+        
+        # Gunakan helper kita untuk mengubah "al fatihah" menjadi 1
+        surah_number = get_surah_number_from_name(surah_part) 
+            
+        if surah_number:
+            try:
+                print(f"INFO: Pola 1C (Name-Num) terdeteksi: {surah_number}:{ayah_part}")
+                return get_spesific_ayah(surah_number, ayah_part)
+            except HTTPException as e:
+                raise e # Lemparkan error jika ayat tidak ada
+            except Exception as e:
+                raise HTTPException(status_code=500, detail=f"Error mengambil ayat: {e}")
+        else:
+            # Jika nama surah tidak ditemukan, kita biarkan jatuh ke Pola 2
+            print(f"INFO: Pola 1C gagal, '{surah_part}' bukan nama surah. Jatuh ke Pola 2.")
+            pass
+
+    # === Pola 1.5: Pencarian "Nama Surah Saja" (di-upgrade) ===
+    
+    # Salinan kueri untuk dicek
+    surah_query = query
+    
+    # Coba bersihkan awalan "surah" atau "surat" (case-insensitive)
+    if re.match(r'^(surah|surat)\s+', surah_query, re.IGNORECASE):
+        # Ganti "surah " / "surat " dengan string kosong
+        surah_query = re.sub(r'^(surah|surat)\s+', '', surah_query, flags=re.IGNORECASE).strip()
+
+    # Cek kueri yang sudah bersih (misal "Al-Mulk") ATAU kueri asli (jika tidak ada awalan "surah")
+    surah_number_match = get_surah_number_from_name(surah_query)
+    
+    if surah_number_match:
+        print(f"INFO: Pola 1.5 (Nama Surah) terdeteksi untuk: '{query}' ({surah_number_match})")
+        matches = []
+        # Loop di file indeks kita
+        for verse in QURAN_SEARCH_INDEX:
+            if verse["surah"] == surah_number_match:
+                matches.append({
+                    "surah": verse["surah"],
+                    "ayah": verse["ayah"],
+                    "text_arab": verse["text_arab"],
+                    "translation": verse["translation"],
+                    "surah_name": SURAH_NUMBER_TO_NAME.get(verse['surah'], 'Unknown'),
+                    "score": 100, # Ini adalah pencocokan pasti
+                    "match_type": "surah_match" 
+                })
+        
+        if not matches:
+            raise HTTPException(status_code=404, detail=f"Surah {query} ditemukan, tapi tidak ada ayat di indeks.")
+        
+        # Kembalikan sebagai daftar
+        return {
+            "match_type": "multiple",
+            "results": matches
+        }
+
+    # === Pola 2: Pencarian Teks (Full-Text Search) ===
+    # Jika tidak ada pola di atas yang cocok, baru jalankan ini
+    print(f"INFO: Tidak ada pola cocok. Melakukan Full-Text Search untuk: '{query}'")
+    
+    # Normalisasi kueri
+    query_norm_arab = normalize_arabic(query)
+    query_lower_indo = query.lower()
+    
+    matches = []
+    found_ids = set() 
+    
+    MIN_ARABIC_SCORE = 95 
+    
+    for verse in QURAN_SEARCH_INDEX:
+        verse_id = f"{verse['surah']}:{verse['ayah']}"
+        if verse_id in found_ids:
+            continue 
+
+        score = 0
+        match_type = ""
+        
+        if query_lower_indo in verse["translation"].lower():
+            score = 100
+            match_type = "translation"
+        
+        elif query_lower_indo in verse["tafsir"].lower():
+            score = 99 
+            match_type = "tafsir"
+            
+        else:
+            arabic_score = fuzz.partial_ratio(query_norm_arab, verse["text_normalized"])
+            if arabic_score >= MIN_ARABIC_SCORE:
+                score = arabic_score
+                match_type = "lafadz"
+        
+        if score > 0:
+            matches.append({
+                "surah": verse["surah"],
+                "ayah": verse["ayah"],
+                "text_arab": verse["text_arab"],
+                "translation": verse["translation"],
+                "surah_name": SURAH_NUMBER_TO_NAME.get(verse['surah'], 'Unknown'),
+                "score": score,
+                "match_type": match_type
+            })
+            found_ids.add(verse_id)
+
+    if not matches:
+        raise HTTPException(status_code=404, detail="Tidak ada hasil yang cocok ditemukan.")
+        
+    matches.sort(key=lambda x: x['score'], reverse=True)
+    
+    return {
+        "match_type": "multiple",
+        "results": matches
+    }
+
+
+    # === ENDPOINT UNTUK VOICE SEARCH ===
 @app.post("/search-by-text")
 def search_by_text(request: VoiceSearchRequest):
     if not QURAN_SEARCH_INDEX:

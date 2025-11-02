@@ -19,7 +19,7 @@ h1 {
   color: #005b96;
 }
 
-.search-box {
+/* .search-box {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -49,6 +49,21 @@ h1 {
 
 .search-box button:hover:not(:disabled) {
   background-color: #0056b3;
+} */
+
+
+.search-box .global-search-input {
+  flex-grow: 1; /* Membuat search bar mengisi ruang */
+  padding: 10px 15px;
+  font-size: 1em;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Ubah ukuran tombol rekam agar serasi */
+.voice-button {
+  padding: 10px 12px; /* Sesuaikan padding */
+  margin-left: 0; /* Hapus margin kiri */
 }
 
 hr {

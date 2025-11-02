@@ -21,9 +21,10 @@ if (recognition) {
 function App() {
   // == DEKLARASI STATE ==
   // State untuk menyimpan nilai input form
-  const [surahInput, setSurahInput] = useState('67'); //Default Al-Mulk
-  const [ayahInput, setAyahInput] = useState('1'); //Default ayat 1 - Al-Mulk
-
+  // const [surahInput, setSurahInput] = useState('67'); //Default Al-Mulk
+  // const [ayahInput, setAyahInput] = useState('1'); //Default ayat 1 - Al-Mulk
+  // TAMBAHKAN INI
+  const [searchInput, setSearchInput] = useState('');
   // State untuk menyimpan hasil dari API
   const [searchResult, setSearchResult] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -35,27 +36,39 @@ function App() {
 
   // == FUNGSI FETCHING ==
   // Fungsi ini akan dipanggil saat tombol "Cari" diklik
-  const handleSearch = async () => {
-    setIsLoading(true); //Mulai Loading
-    setError(null); //Hapus error lama
-    setSearchResult(null); //Hapus hasil lama
+  // GANTI FUNGSI LAMA
+const handleSearch = async () => {
+  setIsLoading(true);
+  setError(null);
+  setSearchResult(null);
+  setMultipleResults([]);
 
-    try {
-      //Panggil backend FastAPI
-      const response = await fetch(`http://127.0.0.1:8000/surah/${surahInput}/${ayahInput}`);
+  try {
+    // Panggil endpoint BARU kita
+    const response = await fetch(`http://127.0.0.1:8000/search?q=${encodeURIComponent(searchInput)}`);
 
-      if (!response.ok) {
-        throw new Error('Data tidak ditemukan atau terjadi kesalahan.');
-      }
-
-      const apiResponse = await response.json();
-      setSearchResult(apiResponse.data); //Simpan hanya bagian 'data' ke state
-    } catch (err) {
-      setError(err.message); //Tangkap error
-    } finally {
-      setIsLoading(false); //Selesai loading, baik sukses atau gagal
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || 'Pencarian gagal.');
     }
-  };
+
+    const apiResponse = await response.json();
+
+    // Cek jenis respons (Sama seperti logic voice search)
+    if (apiResponse.match_type === "multiple") {
+      setMultipleResults(apiResponse.results);
+      setSearchResult(null);
+    } else {
+      setSearchResult(apiResponse.data);
+      setMultipleResults([]);
+    }
+
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
     // == FUNGSI UNTUK FETCH DATA SUARA ==
   const fetchBySpokenText = async (text) => {
@@ -175,43 +188,37 @@ function App() {
       <h1>Aplikasi Tafsir Al-Qur'an (React Ver.)</h1>
       <p>Studi Kasus: Surah Al-Mulk</p>
 
-      {/* --- Area Pencarian Manual --- */}
+      {/* --- Area Pencarian GLOBAL --- */}
       <div className="search-box">
-        <label htmlFor="surah">Nomor Surat:</label>
         <input
-          type="number"
-          id="surahInput"
-          value={surahInput}
-          onChange={(e) => setSurahInput(e.target.value)}
+          type="text"
+          className="global-search-input" // Class baru
+          placeholder="Cari ayat, arti, tafsir (misal: 2:255, al-fatihah:7, atau 'sabar')..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          // Tambahkan fitur 'Enter'
+          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
         />
-        <label htmlFor="ayah">Nomor Ayat:</label>
-        <input
-          type="number"
-          id="ayahInput"
-          value={ayahInput}
-          onChange={(e) => setAyahInput(e.target.value)}
-        />
-        <button onClick={handleSearch} disabled={isLoading || isRecording}>
-          {isLoading ? 'Mencari...' : 'Cari'}
-        </button>
 
-        {/* ================================================ */}
-        {/* === INI ADALAH PERBAIKANNYA === */}
-        {/* 'recognition' sekarang sudah terdefinisi */}
+        {/* Tombol Voice Search (tidak berubah) */}
         {recognition ? (
           <button
             className="voice-button"
             onClick={handleVoiceSearch}
             disabled={isLoading || isRecording}
           >
-            {isRecording ? 'Mendengarkan...' : '🎤 Ucapkan Ayat'}
+            {isRecording ? 'Mendengarkan...' : '🎤'}
           </button>
         ) : (
-          <p className="error-message" style={{ marginLeft: '10px' }}>
-            Browser tidak mendukung fitur suara.
+          <p className="error-message" style={{ margin: '0 10px' }}>
+            No Mic
           </p>
         )}
-        {/* ================================================ */}
+
+        {/* Tombol Cari (tidak berubah) */}
+        <button onClick={handleSearch} disabled={isLoading || isRecording}>
+          {isLoading ? 'Mencari...' : 'Cari'}
+        </button>
       </div>
 
       <hr />
