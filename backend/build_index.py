@@ -13,19 +13,30 @@ OUTPUT_FILENAME = "quran_search_index.json"
 
 def normalize_arabic(text: str) -> str:
     """
-    Fungsi ini untuk membersihkan teks Arab.
-    Menghapus harakat, tatweel, dan semua tanda baca.
+    Fungsi Normalisasi Master BARU.
+    Sinkron dengan normalizeArabicJS di frontend.
     """
     try:
-        # Pola regex untuk mencocokkan SEMUA tanda baca (Arab dan umum)
-        punctuation_pattern = r'[^\w\s]'
+        # 1. Hapus Harakat, Dagger Alif, Annotations, Alif Wasl, Madda
+        text = re.sub(r'[\u064B-\u065F\u0610-\u061A\u0670\u0671\u0653]', '', text)
         
-        # 1. Hapus harakat
-        text = araby.strip_tashkeel(text)
-        # 2. Hapus tatweel
-        text = araby.strip_tatweel(text)
-        # 3. Hapus tanda baca menggunakan regex
-        text = re.sub(punctuation_pattern, '', text)
+        # 2. Hapus Tatweel
+        text = re.sub(r'\u0640', '', text)
+        
+        # 3. Normalisasi Alif (أ, إ, آ -> ا)
+        text = re.sub(r'[\u0622\u0623\u0625]', '\u0627', text)
+        
+        # 4. Normalisasi Ya (ى -> ي)
+        text = re.sub(r'\u0649', '\u064A', text)
+        
+        # 5. Normalisasi Ta Marbuta (ة -> ه)
+        text = re.sub(r'\u0629', '\u0647', text)
+
+        # 6. Hapus semua sisa non-huruf Arab dan non-spasi
+        text = re.sub(r'[^\u0621-\u064A\s]', '', text)
+        
+        # 7. Hapus spasi berlebih
+        text = re.sub(r'\s+', ' ', text).strip()
         
         return text
     except Exception as e:

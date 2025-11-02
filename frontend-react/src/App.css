@@ -79,6 +79,8 @@ hr {
   text-align: right;
   direction: rtl;
   color: #000;
+  display: block; /* Membuat <span> berlaku seperti <h4> (block-level) */
+  margin-bottom: 10px;
 }
 
 
@@ -109,7 +111,8 @@ hr {
   margin-bottom: 10px;
 }
 
-.ayah-display-short h4 {
+.ayah-display-short .arabic-text {
+  font-size: 1.5em; /* Sedikit lebih kecil di daftar */
   margin-top: 0;
 }
 
@@ -120,4 +123,12 @@ hr {
 
 .ayah-display-short.clickable:hover {
   background-color: #e9e9e9; /* Warna sedikit abu saat hover */
+}
+
+/* Style untuk highlight */
+.arabic-text mark {
+  background-color: #f2ff00; /* Kuning pucat */
+  color: inherit; /* Warisi warna teks (hitam) */
+  padding: 0 2px;
+  border-radius: 3px;
 }

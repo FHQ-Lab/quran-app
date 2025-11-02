@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css'; //buat file CSS
-
+import Highlight from './Highlight.jsx'; 
 // =======================================================
 // !!! BAGIAN INI HILANG DARI KODE KAMU !!!
 // Kamu perlu mendefinisikan 'recognition' DI LUAR komponen
@@ -30,6 +30,8 @@ function App() {
   const [error, setError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [multipleResults, setMultipleResults] = useState([]);
+  // State untuk Highlight search
+  const [spokenQuery, setSpokenQuery] = useState("");
 
   // == FUNGSI FETCHING ==
   // Fungsi ini akan dipanggil saat tombol "Cari" diklik
@@ -149,6 +151,7 @@ function App() {
     recognition.onresult = (event) => {
       const spokenText = event.results[0][0].transcript;
       console.log('Teks yang diucapkan:', spokenText);
+      setSpokenQuery(spokenText); // Simpan ucapan ke state
       // Panggil fungsi fetch baru kita
       fetchBySpokenText(spokenText);
     };
@@ -249,7 +252,7 @@ function App() {
               onClick={() => handleMultipleResultClick(match.surah, match.ayah)}
               // ===================================
             >
-              <h4 className="arabic-text">{match.text_arab}</h4>
+              <Highlight text={match.text_arab} query={spokenQuery} />
               <p>
                 <strong>(QS. {match.surah}: Ayat {match.ayah})</strong> -
                 Skor: {match.score}%
