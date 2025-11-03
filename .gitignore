@@ -5,6 +5,9 @@ backend/venv/
 backend/__pycache__/
 backend/*.pyc
 
+#API GEMINI
+backend/.env
+
 # Node.js dependencies (sangat besar!)
 frontend-react/node_modules/
 

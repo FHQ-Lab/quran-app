@@ -43,34 +43,43 @@ function Chatbot({ onClose }) {
     setInput('');
     setIsLoading(true);
 
-    try {
-      // Panggil endpoint chatbot BARU kita
-      const response = await fetch('http://127.0.0.1:8000/chatbot', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: userMessage.content })
-      });
+      try {
+          const response = await fetch('http://127.0.0.1:8000/chatbot', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: userMessage.content })
+          });
+          
+          const botResponseData = await response.json();
 
-      const botResponseData = await response.json();
-
-      let botMessage;
-      if (!response.ok) {
-        // Jika error (misal: "Maaf tidak mengerti" atau "Ayat tidak ada")
-        botMessage = {
-          id: Date.now() + 1,
-          sender: 'bot',
-          content: botResponseData.detail || "Terjadi kesalahan."
-        };
-      } else {
-        // Jika sukses (dapat data ayat)
-        botMessage = {
-          id: Date.now() + 1,
-          sender: 'bot',
-          content: <BotAyahResponse data={botResponseData.data} /> // Kita kirim komponen!
-        };
-      }
-      setMessages(prev => [...prev, botMessage]);
-
+          let botMessage;
+          if (!response.ok) {
+            // Jika error
+            botMessage = {
+              id: Date.now() + 1,
+              sender: 'bot',
+              content: botResponseData.detail || "Terjadi kesalahan."
+            };
+          } else {
+            // === LOGIKA BARU UNTUK 2 TIPE JAWABAN ===
+            if (botResponseData.answer_type === "text") {
+              // KASUS 2: Jawaban teks dari RAG
+              botMessage = {
+                id: Date.now() + 1,
+                sender: 'bot',
+                content: botResponseData.content // Ini adalah string teks biasa
+              };
+            } else {
+              // KASUS 1: Jawaban objek ayat (Logika lama)
+              botMessage = {
+                id: Date.now() + 1,
+                sender: 'bot',
+                content: <BotAyahResponse data={botResponseData.data} />
+              };
+            }
+            // =======================================
+          }
+          setMessages(prev => [...prev, botMessage]);
     } catch (err) {
       const errorMessage = {
         id: Date.now() + 1,
