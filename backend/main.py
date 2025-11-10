@@ -8,7 +8,8 @@ import json  # <--- INI JUGA PENTING WOK
 from thefuzz import fuzz
 import os
 from dotenv import load_dotenv
-import google.generativeai as genai
+from groq import AsyncGroq # Kita pakai versi Async
+# import google.generativeai as genai
 
 # === Model untuk menerima data dari frontend ===
 class VoiceSearchRequest(BaseModel):
@@ -95,13 +96,15 @@ except Exception as e:
 load_dotenv() # Memuat .env file
 
 try:
-    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-    # Inisialisasi model
-    model = genai.GenerativeModel('gemini-1.0-pro') # Model gemini yang cukup stabil
-    print("INFO:    Model Generatif Gemini berhasil dikonfigurasi.")
+    # Inisialisasi Klien Groq
+    client = AsyncGroq(
+        api_key=os.environ["GROQ_API_KEY"],
+    )
+    print("INFO:    Klien Groq (Model Llama 3) berhasil dikonfigurasi.")
 except Exception as e:
-    model = None
-    print(f"!!! ERROR FATAL: Gagal mengkonfigurasi Gemini: {e} !!!")
+    client = None
+    print(f"!!! ERROR FATAL: Gagal mengkonfigurasi Groq: {e} !!!")
+
 
 # Kita akan memuat semua tafsir Al-Mulk ke memori
 AL_MULK_CONTEXT = ""
@@ -418,58 +421,99 @@ def search_by_text(request: VoiceSearchRequest):
             "match_type": "multiple",
             "results": matches
         }
+        
+# Helper Function
+def extract_ayat_numbers(message: str) -> list[int]:
+    """Mengekstrak nomor ayat (termasuk rentang) dari pesan."""
+    numbers = set()
     
-# === ENDPOINT BARU UNTUK CHATBOT (KONTEKS AL-MULK) ===
-# === ENDPOINT CHATBOT BARU (VERSI UPGRADE PINTAR) ===
+    # 1. Cari angka individual (misal: "ayat 5" atau "10")
+    for match in re.finditer(r'\b(\d+)\b', message):
+        num = int(match.group(1))
+        if 0 < num <= 30:
+            numbers.add(num)
+            
+    # 2. Cari rentang angka (misal: "1-5" atau "10-15")
+    for match in re.finditer(r'(\d+)\s*-\s*(\d+)', message):
+        start = int(match.group(1))
+        end = int(match.group(2))
+        if start < end and end <= 30:
+            for num in range(start, end + 1):
+                numbers.add(num)
+                
+    return sorted(list(numbers)) 
+  
+# === ENDPOINT CHATBOT (VERSI RAG PINTAR) ===
 @app.post("/chatbot")
 async def handle_chatbot_message(request: VoiceSearchRequest):
     user_message = request.text.lower()
     
     # --- LOGIKA BARU UNTUK MEMBEDAKAN NIAT ---
 
-    # 1. Cek apakah ini pertanyaan RAG (analisis)?
-    # Kita cari kata kunci analisis ATAU rentang angka (misal: 1-5)
-    rag_keywords = ["hubungan", "jelaskan", "apa", "kenapa", "mengapa", "ringkasan", "rangkuman"]
-    is_rag_question = any(word in user_message for word in rag_keywords) or re.search(r'\d+-\d+', user_message)
-
-    # 2. Cek apakah ini permintaan ayat sederhana?
-    # Kita cari angka yang "sendirian" (dikelilingi spasi/batas kata)
-    # Ini akan cocok dengan "ayat 5", "tafsir 11", atau bahkan "11"
+    # 1. Cek apakah ini permintaan ayat sederhana? (Regex dari sebelumnya)
     match_simple = re.search(r'\b(\d+)\b', user_message)
-    
-    ayah_number = None
+    ayah_number_simple = None
     if match_simple:
         num = int(match_simple.group(1))
-        if 0 < num <= 30: # Pastikan angkanya valid untuk Al-Mulk
-            ayah_number = num
+        if 0 < num <= 30:
+            ayah_number_simple = num
+            
+    # 2. Cek apakah ini pertanyaan RAG (analisis)? (Regex dari sebelumnya)
+    rag_keywords = ["hubungan", "jelaskan", "apa", "kenapa", "mengapa", "ringkasan", "rangkuman"]
+    is_rag_question = any(word in user_message for word in rag_keywords) or re.search(r'\d+-\d+', user_message)
 
     # --- PENENTUAN KEPUTUSAN ---
 
     # KASUS 1: Ini adalah permintaan ayat sederhana
-    # JIKA ada angka ditemukan DAN INI BUKAN pertanyaan analisis RAG
-    if ayah_number is not None and not is_rag_question:
+    if ayah_number_simple is not None and not is_rag_question:
         try:
-            print(f"INFO: Chatbot (Simple) terdeteksi. Mencari Al-Mulk (67) ayat {ayah_number}")
-            return get_spesific_ayah(surah_number=67, ayah_number=ayah_number)
+            print(f"INFO: Chatbot (Simple) terdeteksi. Mencari Al-Mulk (67) ayat {ayah_number_simple}")
+            return get_spesific_ayah(surah_number=67, ayah_number=ayah_number_simple)
         except HTTPException as e:
-            raise e # Lemparkan error jika get_spesific_ayah gagal
+            raise e
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error saat mengambil ayat: {e}")
 
-    # KASUS 2: Ini adalah pertanyaan RAG (atau fallback jika tidak ada angka)
+    # KASUS 2: Ini adalah pertanyaan RAG
     print(f"INFO: Chatbot (RAG) terdeteksi. Menerima pertanyaan: {user_message}")
-    if not model or not AL_MULK_CONTEXT:
+    if not client or not QURAN_SEARCH_INDEX: # Cek client, bukan model
         raise HTTPException(status_code=500, detail="Model AI tidak terkonfigurasi atau konteks tidak dimuat.")
 
-    # Susun Prompt RAG (tidak berubah)
-    prompt_template = f"""
-    Anda adalah asisten AI yang ahli dalam Tafsir Al-Qur'an, dengan fokus pada Surat Al-Mulk.
-    Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan konteks tafsir (Tafsir Kemenag) dari 30 ayat Surat Al-Mulk yang saya berikan di bawah ini.
-    Jawab dengan ringkas, jelas, dan dalam bahasa Indonesia.
-    Jika pertanyaan pengguna tidak relevan dengan konteks tafsir Al-Mulk, jawab dengan sopan bahwa Anda hanya bisa menjawab seputar tafsir Al-Mulk.
+    # === LOGIKA RAG DINAMIS (BARU) ===
+    
+    # 1. Ekstrak nomor ayat yang relevan dari pertanyaan
+    relevant_ayat_numbers = extract_ayat_numbers(user_message)
+    
+    dynamic_context = ""
+    context_source = "seluruh 30 ayat Al-Mulk" # Default
+    
+    if relevant_ayat_numbers:
+        # 2. Jika ditemukan nomor, buat konteks dinamis
+        print(f"INFO: RAG mengambil konteks spesifik untuk ayat: {relevant_ayat_numbers}")
+        context_source = f"ayat {', '.join(map(str, relevant_ayat_numbers))}"
+        for verse in QURAN_SEARCH_INDEX:
+            if verse["surah"] == 67 and verse["ayah"] in relevant_ayat_numbers:
+                dynamic_context += f"Tafsir Ayat {verse['ayah']}: {verse['tafsir']}\n"
+    else:
+        # 3. Jika tidak ada nomor spesifik, baru pakai konteks penuh
+        print("INFO: RAG menggunakan konteks penuh (30 ayat).")
+        dynamic_context = AL_MULK_CONTEXT # AL_MULK_CONTEXT adalah fallback
 
-    --- KONTEKS TAFSIR 30 AYAT AL-MULK ---
-    {AL_MULK_CONTEXT}
+    # Periksa lagi ukurannya. Jika konteks dinamis masih kosong (misal: user tanya "apa" tanpa sebut ayat)
+    if not dynamic_context:
+        print("INFO: Konteks dinamis kosong, menggunakan konteks penuh (30 ayat).")
+        dynamic_context = AL_MULK_CONTEXT
+        context_source = "seluruh 30 ayat Al-Mulk"
+    
+    # Susun Prompt RAG
+    prompt_template = f"""
+    Anda adalah asisten AI yang ahli dalam Tafsir Al-Qur'an (Surat Al-Mulk).
+    Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan konteks tafsir dari {context_source} yang saya berikan.
+    Jawab dengan ringkas, jelas, dan dalam bahasa Indonesia.
+    Jika pertanyaan pengguna tidak relevan dengan konteks, jawab dengan sopan bahwa Anda hanya bisa menjawab seputar tafsir Al-Mulk.
+
+    --- KONTEKS TAFSIR ---
+    {dynamic_context}
     --- AKHIR KONTEKS ---
 
     Pertanyaan Pengguna: "{user_message}"
@@ -478,10 +522,26 @@ async def handle_chatbot_message(request: VoiceSearchRequest):
     """
     
     try:
-        # Kirim prompt ke Gemini API
-        response = await model.generate_content_async(prompt_template)
-        return {"answer_type": "text", "content": response.text}
+        # Kirim prompt ke Groq API (menggunakan Llama 3)
+        chat_completion = await client.chat.completions.create(
+            messages=[
+                {
+                    "role": "system",
+                    "content": prompt_template # Kirim prompt lengkap sebagai 'system'
+                },
+                {
+                    "role": "user",
+                    "content": user_message # Kirim pertanyaan asli sebagai 'user'
+                }
+            ],
+            model="llama-3.3-70b-versatile", 
+        )
         
+        return {"answer_type": "text", "content": chat_completion.choices[0].message.content}
+
     except Exception as e:
-        print(f"Error Gemini API: {e}")
+        print(f"Error Groq API: {e}")
+        # Jika error-nya 413 lagi, beri pesan yang lebih jelas
+        if "413" in str(e):
+             raise HTTPException(status_code=500, detail="Permintaan Anda terlalu besar (melebihi batas token). Coba ajukan pertanyaan yang lebih spesifik.")
         raise HTTPException(status_code=500, detail=f"Terjadi kesalahan saat menghubungi model AI: {e}")
