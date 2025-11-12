@@ -9,6 +9,9 @@ from thefuzz import fuzz
 import os
 from dotenv import load_dotenv
 from groq import AsyncGroq # Kita pakai versi Async
+import numpy as np
+import faiss
+from sentence_transformers import SentenceTransformer
 # import google.generativeai as genai
 
 # === Model untuk menerima data dari frontend ===
@@ -31,90 +34,91 @@ app.add_middleware(
 #Definisikan URL dasar dari QURAN API
 QURAN_API_BASE_URL = "https://quran-api-id.vercel.app"
 
-# === Data Cache: Memuat Indeks dari File Lokal ===
-SEARCH_INDEX_FILE = "quran_search_index.json"
-QURAN_SEARCH_INDEX = [] # Default list kosong
+# =====================================================================
+# === BLOK STARTUP APLIKASI ===
+# =====================================================================
 
+# --- 1. Muat Variabel Lingkungan (.env) ---
+load_dotenv()
+
+# --- 2. Konfigurasi Model AI (Groq) ---
 try:
-    # Buka dan baca file JSON yang sudah kita buat
-    with open(SEARCH_INDEX_FILE, 'r', encoding='utf-8') as f:
-        QURAN_SEARCH_INDEX = json.load(f)
-    
-    if QURAN_SEARCH_INDEX:
-        print(f"INFO:    Berhasil memuat {len(QURAN_SEARCH_INDEX)} ayat dari {SEARCH_INDEX_FILE}")
-    else:
-        print(f"!!! WARNING: {SEARCH_INDEX_FILE} ditemukan tapi kosong.")
-
-except FileNotFoundError:
-    print(f"!!! ERROR FATAL: File {SEARCH_INDEX_FILE} tidak ditemukan. !!!")
-    print("!!! Pastikan Anda sudah menjalankan 'python build_index.py' terlebih dahulu. !!!")
-except Exception as e:
-    print(f"!!! ERROR FATAL: Gagal memuat {SEARCH_INDEX_FILE}: {e} !!!")
-# =======================================================
-
-# === Muat Peta Nama Surah ===
-SURAH_NAME_TO_NUMBER = {}
-SURAH_NUMBER_TO_NAME = {}
-try:
-    print("INFO:    Mengambil data peta Surah...")
-    response = requests.get(f"{QURAN_API_BASE_URL}/surah")
-    response.raise_for_status()
-    surahs_data = response.json().get("data", [])
-    
-    for surah in surahs_data:
-        # 1. Ambil nomor
-        number = surah["number"]
-        
-        # 2. Siapkan nama yang bagus untuk ditampilkan
-        SURAH_NUMBER_TO_NAME[number] = surah["name"]["transliteration"]["id"]
-        
-        # 3. Buat daftar semua kemungkinan alias nama
-        names_to_add = [
-            surah["name"]["transliteration"]["id"].lower(), # misal: "al-fatihah"
-            surah["name"]["short"].lower(),                 # misal: "al-fatihah"
-            surah["name"]["translation"]["id"].lower()      # misal: "pembukaan"
-        ]
-        
-        # 4. Tambahkan semua alias (termasuk yang dinormalisasi) ke peta
-        for name in names_to_add:
-            if name:
-                # Tambahkan versi asli (misal: "al-fatihah")
-                SURAH_NAME_TO_NUMBER[name] = number
-                
-                # Tambahkan versi normalisasi (misal: "alfatihah")
-                norm_name = name.replace("-", "").replace(" ", "")
-                SURAH_NAME_TO_NUMBER[norm_name] = number
-
-
-    print(f"INFO:    Berhasil memuat {len(SURAH_NAME_TO_NUMBER)} alias nama Surah.")
-
-except Exception as e:
-    print(f"!!! ERROR FATAL: Gagal memuat peta nama Surah: {e} !!!")
-# =======================================================
-
-# Setup API Gemini
-load_dotenv() # Memuat .env file
-
-try:
-    # Inisialisasi Klien Groq
-    client = AsyncGroq(
-        api_key=os.environ["GROQ_API_KEY"],
-    )
+    client = AsyncGroq(api_key=os.environ["GROQ_API_KEY"])
     print("INFO:    Klien Groq (Model Llama 3) berhasil dikonfigurasi.")
 except Exception as e:
     client = None
     print(f"!!! ERROR FATAL: Gagal mengkonfigurasi Groq: {e} !!!")
 
-
-# Kita akan memuat semua tafsir Al-Mulk ke memori
-AL_MULK_CONTEXT = ""
+# --- 3. Muat Model Sentence Transformer (untuk RAG) ---
+# Model ini akan mengubah pertanyaan user menjadi vektor
+MODEL_NAME = 'paraphrase-multilingual-MiniLM-L12-v2'
 try:
-    for verse in QURAN_SEARCH_INDEX:
-        if verse["surah"] == 67:
-            AL_MULK_CONTEXT += f"Tafsir Ayat {verse['ayah']}: {verse['tafsir']}\n"
-    print("INFO:    Berhasil memuat konteks tafsir Al-Mulk.")
+    print(f"INFO:    Memuat model RAG '{MODEL_NAME}'... (Mungkin butuh beberapa saat)")
+    RAG_MODEL = SentenceTransformer(MODEL_NAME)
+    print("INFO:    Model RAG berhasil dimuat.")
 except Exception as e:
-    print(f"!!! ERROR: Gagal memuat konteks Al-Mulk: {e}")
+    RAG_MODEL = None
+    print(f"!!! ERROR FATAL: Gagal memuat model RAG: {e} !!!")
+
+# --- 4. Muat Database Vektor (FAISS) & Peta Referensi ---
+FAISS_INDEX_FILE = "quran_faiss.index"
+VERSE_MAP_FILE = "verse_references.json"
+try:
+    FAISS_INDEX = faiss.read_index(FAISS_INDEX_FILE)
+    with open(VERSE_MAP_FILE, 'r', encoding='utf-8') as f:
+        VERSE_REFERENCES = json.load(f) # Ini adalah list ["1:1", "1:2", ...]
+    print(f"INFO:    Database Vektor ({FAISS_INDEX.ntotal} vektor) & Peta Referensi berhasil dimuat.")
+except Exception as e:
+    FAISS_INDEX = None
+    VERSE_REFERENCES = []
+    print(f"!!! ERROR FATAL: Gagal memuat database FAISS: {e} !!!")
+
+# --- 5. Muat Peta Teks (dari quran_search_index.json) ---
+# Kita tetap butuh ini untuk mengambil teks tafsir berdasarkan referensi
+SOURCE_INDEX_FILE = "quran_search_index.json"
+QURAN_TEXT_MAP = {} # Kita ubah dari list jadi DICTIONARY untuk akses cepat
+try:
+    with open(SOURCE_INDEX_FILE, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    # Ubah list jadi dictionary (hash map)
+    for verse in data:
+        key = f"{verse['surah']}:{verse['ayah']}"
+        QURAN_TEXT_MAP[key] = verse # Simpan semua data ayat
+    print(f"INFO:    Berhasil memuat {len(QURAN_TEXT_MAP)} teks ayat ke dalam Peta.")
+except Exception as e:
+    QURAN_TEXT_MAP = {}
+    print(f"!!! ERROR FATAL: Gagal memuat {SOURCE_INDEX_FILE}: {e} !!!")
+
+# --- 6. Muat Peta Nama Surah (dari API) ---
+SURAH_NAME_TO_NUMBER = {}
+SURAH_NUMBER_TO_NAME = {}
+try:
+    # (Kode untuk memuat peta nama surah tetap sama seperti sebelumnya)
+    print("INFO:    Mengambil data peta Surah...")
+    response = requests.get(f"{QURAN_API_BASE_URL}/surah") 
+    response.raise_for_status()
+    surahs_data = response.json().get("data", [])
+    
+    for surah in surahs_data:
+        number = surah["number"]
+        SURAH_NUMBER_TO_NAME[number] = surah["name"]["transliteration"]["id"]
+        names_to_add = [
+            surah["name"]["transliteration"]["id"].lower(),
+            surah["name"]["short"].lower(),
+            surah["name"]["translation"]["id"].lower()
+        ]
+        for name in names_to_add:
+            if name:
+                SURAH_NAME_TO_NUMBER[name] = number
+                norm_name = name.replace("-", "").replace(" ", "")
+                SURAH_NAME_TO_NUMBER[norm_name] = number
+    print(f"INFO:    Berhasil memuat {len(SURAH_NAME_TO_NUMBER)} alias nama Surah.")
+except Exception as e:
+    print(f"!!! ERROR FATAL: Gagal memuat peta nama Surah: {e} !!!")
+
+# =====================================================================
+# === AKHIR BLOK STARTUP ===
+# =====================================================================
 
 
 def normalize_arabic(text: str) -> str:
@@ -257,7 +261,7 @@ def search_global(q: str):
         print(f"INFO: Pola 1.5 (Nama Surah) terdeteksi untuk: '{query}' ({surah_number_match})")
         matches = []
         # Loop di file indeks kita
-        for verse in QURAN_SEARCH_INDEX:
+        for verse in QURAN_TEXT_MAP.values():
             if verse["surah"] == surah_number_match:
                 matches.append({
                     "surah": verse["surah"],
@@ -291,7 +295,7 @@ def search_global(q: str):
     
     MIN_ARABIC_SCORE = 95 
     
-    for verse in QURAN_SEARCH_INDEX:
+    for verse in QURAN_TEXT_MAP.values():
         verse_id = f"{verse['surah']}:{verse['ayah']}"
         if verse_id in found_ids:
             continue 
@@ -339,7 +343,7 @@ def search_global(q: str):
     # === ENDPOINT UNTUK VOICE SEARCH ===
 @app.post("/search-by-text")
 def search_by_text(request: VoiceSearchRequest):
-    if not QURAN_SEARCH_INDEX:
+    if not QURAN_TEXT_MAP.values():
         raise HTTPException(status_code=500, detail="Indeks pencarian Qur'an tidak bisa dimuat.")
 
     spoken_text_normalized = normalize_arabic(request.text)
@@ -357,7 +361,7 @@ def search_by_text(request: VoiceSearchRequest):
     print(f"==> Teks Normalisasi: {spoken_text_normalized}")
     print("==> Memulai Pencarian... (Mencari skor >= {MIN_CONFIDENCE_SCORE}%)")
 
-    for verse in QURAN_SEARCH_INDEX:
+    for verse in QURAN_TEXT_MAP.values():
         # Bandingkan dengan 'text_normalized' yang baru
         verse_text_normalized = verse["text_normalized"]
 
@@ -443,95 +447,117 @@ def extract_ayat_numbers(message: str) -> list[int]:
                 
     return sorted(list(numbers)) 
   
-# === ENDPOINT CHATBOT (VERSI RAG PINTAR) ===
+
+# === ENDPOINT CHATBOT (VERSI RAG VEKTOR) ===
 @app.post("/chatbot")
 async def handle_chatbot_message(request: VoiceSearchRequest):
     user_message = request.text.lower()
     
     # --- LOGIKA BARU UNTUK MEMBEDAKAN NIAT ---
 
-    # 1. Cek apakah ini permintaan ayat sederhana? (Regex dari sebelumnya)
-    match_simple = re.search(r'\b(\d+)\b', user_message)
-    ayah_number_simple = None
-    if match_simple:
-        num = int(match_simple.group(1))
-        if 0 < num <= 30:
-            ayah_number_simple = num
-            
-    # 2. Cek apakah ini pertanyaan RAG (analisis)? (Regex dari sebelumnya)
-    rag_keywords = ["hubungan", "jelaskan", "apa", "kenapa", "mengapa", "ringkasan", "rangkuman"]
+    # 1. Cek apakah ini pertanyaan RAG (analisis)?
+    rag_keywords = ["hubungan", "jelaskan", "apa", "kenapa", "mengapa", "ringkasan", "rangkuman", "tentang"]
     is_rag_question = any(word in user_message for word in rag_keywords) or re.search(r'\d+-\d+', user_message)
+
+    # 2. Ekstrak SEMUA angka ayat Al-Mulk (1-30) dari pertanyaan
+    ayat_list = extract_ayat_numbers(user_message) # Gunakan helper function yang sudah ada
 
     # --- PENENTUAN KEPUTUSAN ---
 
-    # KASUS 1: Ini adalah permintaan ayat sederhana
-    if ayah_number_simple is not None and not is_rag_question:
+    # KASUS 1: Permintaan ayat sederhana (Contoh: "tafsir 5", "tunjukkan 11")
+    # -> ADA 1 angka, dan BUKAN pertanyaan RAG
+    if len(ayat_list) == 1 and not is_rag_question:
         try:
-            print(f"INFO: Chatbot (Simple) terdeteksi. Mencari Al-Mulk (67) ayat {ayah_number_simple}")
-            return get_spesific_ayah(surah_number=67, ayah_number=ayah_number_simple)
-        except HTTPException as e:
-            raise e
+            ayah_number = ayat_list[0]
+            print(f"INFO: Chatbot (Kasus 1: Simple) terdeteksi. Mencari Al-Mulk (67) ayat {ayah_number}")
+            return get_spesific_ayah(surah_number=67, ayah_number=ayah_number)
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Error saat mengambil ayat: {e}")
 
-    # KASUS 2: Ini adalah pertanyaan RAG
-    print(f"INFO: Chatbot (RAG) terdeteksi. Menerima pertanyaan: {user_message}")
-    if not client or not QURAN_SEARCH_INDEX: # Cek client, bukan model
-        raise HTTPException(status_code=500, detail="Model AI tidak terkonfigurasi atau konteks tidak dimuat.")
-
-    # === LOGIKA RAG DINAMIS (BARU) ===
-    
-    # 1. Ekstrak nomor ayat yang relevan dari pertanyaan
-    relevant_ayat_numbers = extract_ayat_numbers(user_message)
-    
-    dynamic_context = ""
-    context_source = "seluruh 30 ayat Al-Mulk" # Default
-    
-    if relevant_ayat_numbers:
-        # 2. Jika ditemukan nomor, buat konteks dinamis
-        print(f"INFO: RAG mengambil konteks spesifik untuk ayat: {relevant_ayat_numbers}")
-        context_source = f"ayat {', '.join(map(str, relevant_ayat_numbers))}"
-        for verse in QURAN_SEARCH_INDEX:
-            if verse["surah"] == 67 and verse["ayah"] in relevant_ayat_numbers:
-                dynamic_context += f"Tafsir Ayat {verse['ayah']}: {verse['tafsir']}\n"
+    # KASUS 2: Pertanyaan RAG khusus Al-Mulk (Contoh: "hubungan 1-5", "jelaskan ayat 10")
+    # -> ADA angka, DAN INI pertanyaan RAG
+    elif len(ayat_list) > 0 and is_rag_question:
+        print(f"INFO: Chatbot (Kasus 2: Al-Mulk RAG) terdeteksi untuk ayat: {ayat_list}")
+        
+        if not client or not QURAN_TEXT_MAP:
+            raise HTTPException(status_code=500, detail="Model AI atau Peta Teks tidak terkonfigurasi.")
+        
+        # Bangun konteks dinamis HANYA dari Al-Mulk
+        dynamic_context = ""
+        for num in ayat_list:
+            verse_ref = f"67:{num}"
+            verse_data = QURAN_TEXT_MAP.get(verse_ref)
+            if verse_data:
+                dynamic_context += f"Tafsir Ayat {num}: {verse_data['tafsir']}\n"
+        
+        if not dynamic_context:
+            raise HTTPException(status_code=404, detail="Tidak ditemukan konteks tafsir untuk ayat-ayat tersebut di Al-Mulk.")
+        
+        context_source_text = f"Tafsir Al-Mulk ayat {', '.join(map(str, ayat_list))}"
+        
+    # KASUS 3: Pertanyaan RAG Umum (Contoh: "apa itu sabar?", "jelaskan neraka")
+    # -> TIDAK ADA angka, ATAU pertanyaan RAG tanpa angka
     else:
-        # 3. Jika tidak ada nomor spesifik, baru pakai konteks penuh
-        print("INFO: RAG menggunakan konteks penuh (30 ayat).")
-        dynamic_context = AL_MULK_CONTEXT # AL_MULK_CONTEXT adalah fallback
+        print(f"INFO: Chatbot (Kasus 3: Vector RAG) terdeteksi. Menerima pertanyaan: {user_message}")
+        
+        if not client or not RAG_MODEL or not FAISS_INDEX or not QURAN_TEXT_MAP:
+            raise HTTPException(status_code=500, detail="Model AI atau Database Vektor tidak terkonfigurasi.")
 
-    # Periksa lagi ukurannya. Jika konteks dinamis masih kosong (misal: user tanya "apa" tanpa sebut ayat)
-    if not dynamic_context:
-        print("INFO: Konteks dinamis kosong, menggunakan konteks penuh (30 ayat).")
-        dynamic_context = AL_MULK_CONTEXT
-        context_source = "seluruh 30 ayat Al-Mulk"
-    
-    # Susun Prompt RAG
-    prompt_template = f"""
-    Anda adalah asisten AI yang ahli dalam Tafsir Al-Qur'an (Surat Al-Mulk).
-    Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan konteks tafsir dari {context_source} yang saya berikan.
-    Jawab dengan ringkas, jelas, dan dalam bahasa Indonesia.
-    Jika pertanyaan pengguna tidak relevan dengan konteks, jawab dengan sopan bahwa Anda hanya bisa menjawab seputar tafsir Al-Mulk.
+        try:
+            # 1. Ubah pertanyaan user menjadi vektor
+            query_vector = RAG_MODEL.encode([user_message], normalize_embeddings=True)
+            # 2. Cari di FAISS
+            k = 5 # Ambil 5 hasil teratas
+            distances, indices = FAISS_INDEX.search(np.array(query_vector).astype('float32'), k)
+            
+            # 3. Bangun Konteks Dinamis
+            dynamic_context = ""
+            context_source = []
+            for i in indices[0]:
+                verse_ref = VERSE_REFERENCES[i]
+                verse_data = QURAN_TEXT_MAP.get(verse_ref)
+                if verse_data:
+                    surah_name = SURAH_NUMBER_TO_NAME.get(verse_data['surah'], 'Unknown')
+                    context_source.append(f"QS. {surah_name} ({verse_ref})")
+                    dynamic_context += f"Konteks dari {surah_name} ayat {verse_data['ayah']}:\n"
+                    dynamic_context += f"Terjemahan: {verse_data['translation']}\n"
+                    dynamic_context += f"Tafsir: {verse_data['tafsir']}\n---\n"
+            
+            if not dynamic_context:
+                raise HTTPException(status_code=404, detail="Tidak ditemukan konteks yang relevan untuk pertanyaan Anda.")
+            
+            context_source_text = f"konteks {', '.join(context_source)}"
 
-    --- KONTEKS TAFSIR ---
-    {dynamic_context}
-    --- AKHIR KONTEKS ---
+        except Exception as e:
+            print(f"Error Vector RAG: {e}")
+            raise HTTPException(status_code=500, detail=f"Gagal melakukan pencarian vektor: {e}")
 
-    Pertanyaan Pengguna: "{user_message}"
-
-    Jawaban Anda:
-    """
-    
+    # --- BAGIAN GENERASI (Umum untuk Kasus 2 & 3) ---
     try:
-        # Kirim prompt ke Groq API (menggunakan Llama 3)
+        # Susun Prompt RAG (INI DIPERBAIKI - Bug #2)
+        prompt = f"""
+        Anda adalah asisten AI yang ahli dalam Tafsir Al-Qur'an.
+        Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan konteks tafsir dari {context_source_text} yang saya berikan.
+        Jawab dengan ringkas, jelas, dan dalam bahasa Indonesia.
+        Jika pertanyaan pengguna tidak relevan dengan konteks, jawab dengan sopan bahwa Anda hanya bisa menjawab seputar tafsir Al-Mulk.
+
+        --- KONTEKS TAFSIR ---
+        {dynamic_context}
+        --- AKHIR KONTEKS ---
+        """
+
+        print("INFO:    Mengirim prompt RAG ke Groq...")
+        
+        # Ini adalah perbaikan untuk Bug #2
         chat_completion = await client.chat.completions.create(
             messages=[
                 {
-                    "role": "system",
-                    "content": prompt_template # Kirim prompt lengkap sebagai 'system'
+                    "role": "system", # Prompt sistem HANYA berisi instruksi dan konteks
+                    "content": prompt 
                 },
                 {
-                    "role": "user",
-                    "content": user_message # Kirim pertanyaan asli sebagai 'user'
+                    "role": "user", # Prompt user HANYA berisi pertanyaan asli
+                    "content": user_message 
                 }
             ],
             model="llama-3.3-70b-versatile", 
@@ -540,8 +566,7 @@ async def handle_chatbot_message(request: VoiceSearchRequest):
         return {"answer_type": "text", "content": chat_completion.choices[0].message.content}
 
     except Exception as e:
-        print(f"Error Groq API: {e}")
-        # Jika error-nya 413 lagi, beri pesan yang lebih jelas
+        print(f"Error Groq API atau RAG: {e}")
         if "413" in str(e):
              raise HTTPException(status_code=500, detail="Permintaan Anda terlalu besar (melebihi batas token). Coba ajukan pertanyaan yang lebih spesifik.")
         raise HTTPException(status_code=500, detail=f"Terjadi kesalahan saat menghubungi model AI: {e}")
