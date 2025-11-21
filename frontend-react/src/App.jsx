@@ -1,121 +1,119 @@
 import React, { useState } from 'react';
-import './App.css'; //buat file CSS
-import Highlight from './Highlight.jsx'; 
-import Chatbot from './Chatbot.jsx'; // <--- IMPORT BARU
-import './Chatbot.css'; // <--- IMPORT CSS BARU
-// =======================================================
-// !!! BAGIAN INI HILANG DARI KODE KAMU !!!
-// Kamu perlu mendefinisikan 'recognition' DI LUAR komponen
-// agar bisa diakses oleh logic dan JSX di bawah.
-// =======================================================
+
+// --- 1. IMPORT SEMUA KOMPONEN KITA ---
+// (Asumsi semua file ini ada di ./components/)
+import Header from './components/Header';
+import HeroCard from './components/HeroCard';
+import QuickLinks from './components/QuickLinks';
+import SearchBar from './components/SearchBar';
+import SurahCard from './components/SurahCard';
+import ResultsArea from './components/ResultsArea';
+import Chatbot from './components/Chatbot';
+import './components/Chatbot.css'; // CSS untuk Chatbot (tetap terpisah)
+import SurahDetail from './components/SurahDetail'; // <-- Tambahkan ini
+
+
+// Cek SpeechRecognition API (Tetap di sini)
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = SpeechRecognition ? new SpeechRecognition() : null;
-
 if (recognition) {
-  recognition.lang = 'ar-SA'; // Set bahasa ke Arab
+  recognition.lang = 'ar-SA';
   recognition.continuous = false;
   recognition.interimResults = false;
 }
-// =======================================================
-// BATAS KODE YANG HILANG
-// =======================================================
 
-function App() {
-  // == DEKLARASI STATE ==
-  // State untuk menyimpan nilai input form
-  // const [surahInput, setSurahInput] = useState('67'); //Default Al-Mulk
-  // const [ayahInput, setAyahInput] = useState('1'); //Default ayat 1 - Al-Mulk
-  // TAMBAHKAN INI
+// --- DATA DUMMY (NANTI KITA PINDAHKAN) ---
+// Data dummy untuk daftar surah
+const surahList = [
+  { id: 1, number: 1, name: "Al-Fatihah", details: "Makkiyyah • 7 Ayat", arabicName: "الفاتحة" },
+  { id: 2, number: 2, name: "Al-Baqarah", details: "Madaniyah • 286 Ayat", arabicName: "البقرة" },
+  { id: 3, number: 3, name: "Ali 'Imran", details: "Madaniyah • 200 Ayat", arabicName: "آل عمران" },
+  { id: 4, number: 4, name: "An-Nisa'", details: "Madaniyah • 176 Ayat", arabicName: "النساء" },
+  { id: 5, number: 5, name: "Al-Ma'idah", details: "Madaniyah • 120 Ayat", arabicName: "المائدة" },
+  { id: 6, number: 6, name: "Al-An'am", details: "Makkiyah • 165 Ayat", arabicName: "الأنعام" },
+];
+
+// =====================================================================
+// KOMPONEN UTAMA APP.JSX (File-mu)
+// =====================================================================
+function App() { // <-- Kita ganti namanya kembali ke 'App'
+  
+  // === 2. SEMUA STATE KITA ===
   const [searchInput, setSearchInput] = useState('');
-  // State untuk menyimpan hasil dari API
   const [searchResult, setSearchResult] = useState(null);
+  const [multipleResults, setMultipleResults] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [multipleResults, setMultipleResults] = useState([]);
-  // State untuk Highlight search
   const [spokenQuery, setSpokenQuery] = useState("");
-  //Chatbot
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [selectedSurahId, setSelectedSurahId] = useState(null);
 
-  // == FUNGSI FETCHING ==
-  // Fungsi ini akan dipanggil saat tombol "Cari" diklik
-  // GANTI FUNGSI LAMA
-const handleSearch = async () => {
-  setIsLoading(true);
-  setError(null);
-  setSearchResult(null);
-  setMultipleResults([]);
+  // === 3. SEMUA FUNGSI HANDLER KITA (YANG HILANG) ===
 
-  try {
-    // Panggil endpoint BARU kita
-    const response = await fetch(`http://127.0.0.1:8000/search?q=${encodeURIComponent(searchInput)}`);
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.detail || 'Pencarian gagal.');
-    }
-
-    const apiResponse = await response.json();
-
-    // Cek jenis respons (Sama seperti logic voice search)
-    if (apiResponse.match_type === "multiple") {
-      setMultipleResults(apiResponse.results);
-      setSearchResult(null);
-    } else {
-      setSearchResult(apiResponse.data);
-      setMultipleResults([]);
-    }
-
-  } catch (err) {
-    setError(err.message);
-  } finally {
-    setIsLoading(false);
+  // Fungsi ini dipanggil saat kartu surat diklik
+  const handleSurahClick = (id) => {
+    setSelectedSurahId(id);
+    window.scrollTo(0, 0); // Scroll ke atas saat pindah halaman
+  };
+  if (selectedSurahId) {
+    return (
+      <SurahDetail 
+        surahNumber={selectedSurahId} 
+        onBack={() => setSelectedSurahId(null)} // Tombol kembali meng-null-kan state
+      />
+    );
   }
-};
 
-    // == FUNGSI UNTUK FETCH DATA SUARA ==
+  const handleSearch = async () => {
+    setIsLoading(true);
+    setError(null);
+    setSearchResult(null);
+    setMultipleResults([]);
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/search?q=${encodeURIComponent(searchInput)}`);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Pencarian gagal.');
+      }
+      const apiResponse = await response.json();
+      if (apiResponse.match_type === "multiple") {
+        setMultipleResults(apiResponse.results);
+        setSearchResult(null);
+      } else {
+        setSearchResult(apiResponse.data);
+        setMultipleResults([]);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const fetchBySpokenText = async (text) => {
     setIsLoading(true);
     setError(null);
     setSearchResult(null);
     setMultipleResults([]);
-
     try {
-      // Panggil endpoint /search-by-text dengan method POST
       const response = await fetch('http://127.0.0.1:8000/search-by-text', {
-
-        // INI YANG HILANG SEBELUMNYA
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ text: text }) // Kirim teks dalam format JSON
-        // ---------------------------
-
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text })
       });
-
       if (!response.ok) {
-        // Ambil detail error dari backend
         const errorData = await response.json();
         throw new Error(errorData.detail || 'Ayat tidak ditemukan!');
       }
-
       const apiResponse = await response.json();
-
-      // === LOGIKA BARU UNTUK MEMBACA RESPONS ===
       if (apiResponse.match_type === "multiple") {
-        // KASUS 2: Kita dapat daftar pilihan ganda
         setMultipleResults(apiResponse.results);
-        setSearchResult(null); // Pastikan hasil tunggal kosong
+        setSearchResult(null);
       } else {
-        // KASUS 1: Kita dapat objek ayat tunggal
-        // (Backend sudah mengemasnya seperti respons '/surah/...')
         setSearchResult(apiResponse.data);
-        setMultipleResults([]); // Pastikan hasil ganda kosong
+        setMultipleResults([]);
       }
-      // =======================================
-
     } catch (err) {
       setError(err.message);
     } finally {
@@ -123,169 +121,133 @@ const handleSearch = async () => {
     }
   };
 
-  // =========================================
+  const handleVoiceSearch = () => {
+    if (!recognition) {
+      setError("Browser Anda tidak mendukung Voice Recognition.");
+      return;
+    }
+    setIsRecording(true);
+    setError(null);
+    recognition.onresult = (event) => {
+      const spokenText = event.results[0][0].transcript;
+      console.log("Teks yang diucapkan:", spokenText);
+      setSpokenQuery(spokenText);
+      fetchBySpokenText(spokenText);
+    };
+    recognition.onerror = (event) => {
+      setError(`Error rekaman: ${event.error}`);
+    };
+    recognition.onend = () => {
+      setIsRecording(false);
+    };
+    recognition.start();
+  };
 
-  // === FUNGSI BARU UNTUK HANDLE KLIK HASIL GANDA ===
   const handleMultipleResultClick = async (surahNumber, ayahNumber) => {
     console.log(`Mengambil detail untuk Surah ${surahNumber}, Ayat ${ayahNumber}`);
     setIsLoading(true);
     setError(null);
     setSearchResult(null);
-    setMultipleResults([]); // Langsung kosongkan list
-
+    setMultipleResults([]);
     try {
-      // Panggil endpoint yang SAMA dengan pencarian manual
       const response = await fetch(`http://127.0.0.1:8000/surah/${surahNumber}/${ayahNumber}`);
-
       if (!response.ok) {
         throw new Error(`Gagal mengambil data untuk QS ${surahNumber}:${ayahNumber}.`);
       }
-
       const apiResponse = await response.json();
-      setSearchResult(apiResponse.data); // Simpan hasil LENGKAP ke state searchResult
-
+      setSearchResult(apiResponse.data);
     } catch (err) {
       setError(err.message);
-      setSearchResult(null); // Pastikan searchResult kosong jika error
+      setSearchResult(null);
     } finally {
       setIsLoading(false);
     }
   };
-  // ================================================
 
-  // === FUNGSI BARU UNTUK HANDLE TOMBOL REKAM ===
-  const handleVoiceSearch = () => {
-    // Variabel 'recognition' sekarang sudah terdefinisi
-    if (!recognition) {
-      setError('Browser Anda tidak mendukung Voice Recognition.');
-      return;
-    }
+  // Tentukan apa yang akan ditampilkan: Halaman Utama atau Halaman Hasil
+  const hasSearchResults = searchResult || multipleResults.length > 0 || isLoading || error;
 
-    setIsRecording(true);
-    setError(null);
-
-    // Set event listener-nya di sini
-    recognition.onresult = (event) => {
-      const spokenText = event.results[0][0].transcript;
-      console.log('Teks yang diucapkan:', spokenText);
-      setSpokenQuery(spokenText); // Simpan ucapan ke state
-      // Panggil fungsi fetch baru kita
-      fetchBySpokenText(spokenText);
-    };
-
-    recognition.onerror = (event) => {
-      setError(`Error rekaman: ${event.error}`);
-    };
-
-    recognition.onend = () => {
-      setIsRecording(false);
-    };
-
-    recognition.start();
-  };
-  // ===========================================
-
-  // === 3. RENDER TAMPILAN (JSX) ===
+  // === 4. TAMPILAN JSX (LAYOUT GABUNGAN) ===
   return (
-    <div className="container">
-      {/* ... (H1 dan H2 tidak berubah) ... */}
-      <h1>Aplikasi Tafsir Al-Qur'an (React Ver.)</h1>
-      <p>Studi Kasus: Surah Al-Mulk</p>
+    // Wadah aplikasi utama
+    <div className="min-h-screen bg-gray-100">
 
-      {/* --- Area Pencarian GLOBAL --- */}
-      <div className="search-box">
-        <input
-          type="text"
-          className="global-search-input" // Class baru
-          placeholder="Cari ayat, arti, tafsir (misal: 2:255, al-fatihah:7, atau 'sabar')..."
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          // Tambahkan fitur 'Enter'
-          onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-        />
-
-        {/* Tombol Voice Search (tidak berubah) */}
-        {recognition ? (
-          <button
-            className="voice-button"
-            onClick={handleVoiceSearch}
-            disabled={isLoading || isRecording}
-          >
-            {isRecording ? 'Mendengarkan...' : '🎤'}
-          </button>
-        ) : (
-          <p className="error-message" style={{ margin: '0 10px' }}>
-            No Mic
-          </p>
-        )}
-
-        {/* Tombol Cari (tidak berubah) */}
-        <button onClick={handleSearch} disabled={isLoading || isRecording}>
-          {isLoading ? 'Mencari...' : 'Cari'}
-        </button>
-      </div>
-
-      <hr />
-
-      {/* --- Area Hasil Pencarian --- */}
-      <div className="result-area">
-        {isLoading && <p>Loading...</p>}
-        {error && <p className="error-message">Terjadi kesalahan: {error}</p>}
-
-        {/* --- BLOK 1: HASIL TUNGGAL (YANG SUDAH DIPERBAIKI) --- */}
-        {searchResult && (
-          <div className="ayah-display">
-            <h2>
-              {searchResult.surah.name.transliteration.id} ({searchResult.surah.name.short}) - 
-              Ayat {searchResult.number.inSurah}
-            </h2>
-
-            {/* INI YANG HILANG SEBELUMNYA */}
-            <h3 className="arabic-text">{searchResult.text.arab}</h3>
-            <p><strong>Artinya:</strong> "{searchResult.translation.id}"</p>
-            <h4>Tafsir (KEMENAG):</h4>
-            {/* --------------------------- */}
-
-            <p>{searchResult.tafsir.id.long}</p>
-          </div>
-        )}
-
-        {/* ================================================ */}
-        {/* === BLOK 2: HASIL GANDA (DENGAN onClick) === */}
-      {multipleResults.length > 0 && (
-        <div className="multiple-results-display">
-          <h3>Ditemukan {multipleResults.length} ayat yang sangat mirip (klik untuk detail):</h3>
-          {multipleResults.map((match, index) => (
-            <div
-              className="ayah-display-short clickable" // <-- Tambahkan class 'clickable'
-              key={index}
-              // === TAMBAHKAN onClick DI SINI ===
-              onClick={() => handleMultipleResultClick(match.surah, match.ayah)}
-              // ===================================
-            >
-              <Highlight text={match.text_arab} query={spokenQuery} />
-              <p>
-                <strong>(QS. {match.surah}: Ayat {match.ayah})</strong> -
-                Skor: {match.score}%
-              </p>
-            </div>
-          ))}
+      {/* Header 'sticky' di atas */}
+      <header className="sticky top-0 z-50 bg-white shadow-sm">
+        <div className="max-w-8xl mx-auto">
+          <Header />
         </div>
-      )}
-      {/* ======================================= */}
-      </div>
-      {/* --- Tombol untuk membuka Chatbot --- */}
-      <button 
-        className="chat-toggle-btn" 
+      </header>
+
+      {/* Konten utama */}
+      <main className="max-w-6xl mx-auto py-4 px-4">
+
+        {/* --- Logika Tampilan Kondisional --- */}
+        {hasSearchResults ? (
+          
+          // TAMPILAN B: JIKA ADA HASIL PENCARIAN
+          <ResultsArea
+            isLoading={isLoading}
+            error={error}
+            searchResult={searchResult}
+            multipleResults={multipleResults}
+            spokenQuery={spokenQuery}
+            handleMultipleResultClick={handleMultipleResultClick}
+          />
+
+        ) : (
+
+          // TAMPILAN A: JIKA TIDAK ADA HASIL (HALAMAN UTAMA)
+          <>
+            <HeroCard />
+
+            {/* --- Area Search Bar --- */}
+          <div className="my-4">
+            <SearchBar
+              searchInput={searchInput}
+              setSearchInput={setSearchInput}
+              handleSearch={handleSearch}
+              handleVoiceSearch={handleVoiceSearch}
+              isLoading={isLoading}
+              isRecording={isRecording}
+              recognition={recognition}
+            />
+          </div>
+
+            <QuickLinks />
+            
+            {/* Daftar Surah (Grid Baru) */}
+            <div className="mt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {surahList.map((surah) => (
+                  <div key={surah.id} onClick={() => handleSurahClick(surah.id)}>
+                  <SurahCard
+                    key={surah.id}
+                    number={surah.number}
+                    name={surah.name}
+                    details={surah.details}
+                    arabicName={surah.arabicName}
+                  />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+          
+        )}
+      </main>
+
+      {/* --- Chatbot (di luar <main>) --- */}
+      <button
+        className="chat-toggle-btn"
         onClick={() => setIsChatOpen(!isChatOpen)}
       >
         🤖
       </button>
-
-      {/* --- Jendela Chatbot (muncul jika isChatOpen true) --- */}
       {isChatOpen && <Chatbot onClose={() => setIsChatOpen(false)} />}
+      
     </div>
   );
 }
 
-export default App;
+export default App; // <-- Kita ekspor 'App'
