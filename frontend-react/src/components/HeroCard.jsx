@@ -1,39 +1,59 @@
 import React from 'react';
-
-// Ganti ikon-ikon ini
-const CalendarIcon = () => <span>📅</span>;
-const BookIcon = () => <span> L </span>; // Placeholder untuk logo LPMQ
+// Import ikon minimalis dari Heroicons 2 (Outline version)
+import { HiCalendarDays, HiBookOpen, HiMapPin } from 'react-icons/hi2';
 
 function HeroCard() {
   return (
-    // Wadah utama dengan background (tebakan: gradien hijau)
-    <div className="relative p-6 mx-4 my-4 text-white bg-gradient-to-r from-green-600 to-green-800 rounded-2xl shadow-lg overflow-hidden">
+    <div className="relative mx-auto my-4 overflow-hidden bg-gradient-to-r from-green-600 to-green-800 rounded-3xl shadow-lg">
       
-      {/* Kaligrafi Background (dibuat transparan) */}
-      <img 
-        src="../assets/kaligrafi.png" // Ganti dengan URL/path ke gambar kaligrafi
-        alt="Kaligrafi"
-        className="absolute top-0 right-0 w-1/2 h-full object-cover opacity-20" 
-      />
+      {/* Background Pattern */}
+      <div className="absolute top-0 left-0 w-64 h-64 bg-white opacity-5 rounded-full -translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-white opacity-5 rounded-full translate-x-1/3 translate-y-1/3 pointer-events-none"></div>
 
-      {/* Konten Teks (dibuat di atas background) */}
-      <div className="relative z-10">
-        <h1 className="text-3xl font-bold">Al-Quran dan Arti</h1>
-        <p className="mt-1 text-sm text-green-100">
-          Alquran dan Terjemah Standar Indonesia
-        </p>
+      <div className="relative z-10 flex flex-col items-center justify-center p-8 text-center">
         
-        {/* Info Tanggal & LPMQ */}
-        <div className="flex flex-wrap items-center gap-4 mt-6 text-xs">
-          <div className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">
-            <CalendarIcon />
-            <span>Rabu, 22 Oktober 2025</span>
-          </div>
-          <div className="flex items-center gap-2 px-3 py-1 bg-white/20 rounded-full backdrop-blur-sm">
-            <BookIcon />
-            <span>LPMQ Kemenag</span>
+        {/* Gambar Kaligrafi */}
+        <div className="mb-6">
+          <img 
+            src="/src/assets/closeup_quran.jpg" 
+            alt="background" 
+            className="absolute top-0 right-0 w-full h-full object-center opacity-20"
+            />
+          <img 
+            src="/src/assets/kaligrafi.png" 
+            alt="Kaligrafi"
+            className="w-32 h-auto opacity-90 invert brightness-0 drop-shadow-md" 
+          />
+
+        </div>
+
+        <div className="max-w-lg">
+          <h1 className="text-3xl font-bold text-white md:text-4xl tracking-wide">
+            Al-Qur'an dan Arti
+          </h1>
+          <p className="mt-2 text-sm text-green-100 md:text-base font-light">
+            Alquran dan Terjemah Standar Indonesia
+          </p>
+          
+          {/* Badge Info dengan Ikon Baru */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mt-6 text-xs font-medium text-green-800">
+            
+            {/* Badge Tanggal */}
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/90 rounded-full shadow-sm backdrop-blur-sm">
+              {/* Gunakan komponen ikon langsung di sini */}
+              <HiCalendarDays className="w-4 h-4 text-green-700" />
+              <span>Rabu, 22 Oktober 2025</span>
+            </div>
+
+            {/* Badge Sumber */}
+            <div className="flex items-center gap-2 px-4 py-2 bg-white/90 rounded-full shadow-sm backdrop-blur-sm">
+              <HiMapPin className="w-4 h-4 text-green-700" />
+              <span>LPMQ Kemenag</span>
+            </div>
+
           </div>
         </div>
+
       </div>
     </div>
   );

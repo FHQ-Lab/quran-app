@@ -12,7 +12,30 @@ from groq import AsyncGroq # Kita pakai versi Async
 import numpy as np
 import faiss
 from sentence_transformers import SentenceTransformer
-# import google.generativeai as genai
+
+
+# === KAMUS ALIAS MANUAL (Untuk Typo/Ejaan Umum) ===
+MANUAL_ALIASES = {
+    "yasin": 36,
+    "yaasin": 36,
+    "yaseen": 36,
+    "alfatihah": 1,
+    "al fatihah": 1,
+    "fatihah": 1,
+    "annaba": 78,
+    "an naba": 78,
+    "annisa": 4,
+    "an nisa": 4,
+    "alanam": 6,
+    "al anam": 6,
+    "alkahfi": 18,
+    "alkahf": 18,
+    "al mulk": 67,
+    "almulk": 67,
+    "arrahman": 55,
+    "ar rahman": 55
+    # Tambahkan lainnya sesuai kebutuhan
+}
 
 # === Model untuk menerima data dari frontend ===
 class VoiceSearchRequest(BaseModel):
@@ -102,16 +125,34 @@ try:
     for surah in surahs_data:
         number = surah["number"]
         SURAH_NUMBER_TO_NAME[number] = surah["name"]["transliteration"]["id"]
-        names_to_add = [
+        
+        # Nama-nama dasar dari API
+        base_names = [
             surah["name"]["transliteration"]["id"].lower(),
             surah["name"]["short"].lower(),
             surah["name"]["translation"]["id"].lower()
         ]
-        for name in names_to_add:
-            if name:
-                SURAH_NAME_TO_NUMBER[name] = number
-                norm_name = name.replace("-", "").replace(" ", "")
-                SURAH_NAME_TO_NUMBER[norm_name] = number
+        
+        for name in base_names:
+            if not name: continue
+            
+            # 1. Simpan nama asli (misal: "an-naba'")
+            SURAH_NAME_TO_NUMBER[name] = number
+            
+            # 2. Simpan nama tanpa spasi & strip (misal: "an-naba'" -> "annaba'")
+            norm1 = name.replace("-", "").replace(" ", "")
+            SURAH_NAME_TO_NUMBER[norm1] = number
+            
+            # 3. Simpan nama "BERSIH TOTAL" (Hapus kutip, strip, spasi)
+            # Ini solusi untuk An-Naba', Al-An'am, dll.
+            norm2 = re.sub(r'[^a-z0-9]', '', name) 
+            SURAH_NAME_TO_NUMBER[norm2] = number
+
+    # 4. Masukkan Alias Manual (Prioritas terakhir/override)
+    for alias, num in MANUAL_ALIASES.items():
+        # Bersihkan alias manual juga biar konsisten
+        clean_alias = re.sub(r'[^a-z0-9]', '', alias)
+        SURAH_NAME_TO_NUMBER[clean_alias] = num
     print(f"INFO:    Berhasil memuat {len(SURAH_NAME_TO_NUMBER)} alias nama Surah.")
 except Exception as e:
     print(f"!!! ERROR FATAL: Gagal memuat peta nama Surah: {e} !!!")
@@ -156,10 +197,9 @@ def normalize_arabic(text: str) -> str:
 def get_surah_number_from_name(name: str) -> int | None:
     """Mengubah string nama surah menjadi nomor surah."""
     # Normalisasi input (lowercase, hapus strip, hapus spasi)
-    query = name.lower().strip().replace("-", "").replace(" ", "")
+    query_clean = re.sub(r'[^a-z0-9]', '', name.lower())
     
-    # Langsung cek di peta kita yang sudah pintar
-    return SURAH_NAME_TO_NUMBER.get(query)
+    return SURAH_NAME_TO_NUMBER.get(query_clean)
         
     # return None # Tidak ditemukan
 
@@ -244,42 +284,25 @@ def search_global(q: str):
             print(f"INFO: Pola 1C gagal, '{surah_part}' bukan nama surah. Jatuh ke Pola 2.")
             pass
 
-    # === Pola 1.5: Pencarian "Nama Surah Saja" (di-upgrade) ===
+    # === Pola 1.5: Pencarian "Nama Surah Saja" ===
     
-    # Salinan kueri untuk dicek
-    surah_query = query
+    # Bersihkan awalan "surah"/"surat" dulu
+    clean_q = re.sub(r'^(surah|surat)\s+', '', query, flags=re.IGNORECASE).strip()
     
-    # Coba bersihkan awalan "surah" atau "surat" (case-insensitive)
-    if re.match(r'^(surah|surat)\s+', surah_query, re.IGNORECASE):
-        # Ganti "surah " / "surat " dengan string kosong
-        surah_query = re.sub(r'^(surah|surat)\s+', '', surah_query, flags=re.IGNORECASE).strip()
-
-    # Cek kueri yang sudah bersih (misal "Al-Mulk") ATAU kueri asli (jika tidak ada awalan "surah")
-    surah_number_match = get_surah_number_from_name(surah_query)
+    surah_number_match = get_surah_number_from_name(clean_q)
     
     if surah_number_match:
-        print(f"INFO: Pola 1.5 (Nama Surah) terdeteksi untuk: '{query}' ({surah_number_match})")
-        matches = []
-        # Loop di file indeks kita
-        for verse in QURAN_TEXT_MAP.values():
-            if verse["surah"] == surah_number_match:
-                matches.append({
-                    "surah": verse["surah"],
-                    "ayah": verse["ayah"],
-                    "text_arab": verse["text_arab"],
-                    "translation": verse["translation"],
-                    "surah_name": SURAH_NUMBER_TO_NAME.get(verse['surah'], 'Unknown'),
-                    "score": 100, # Ini adalah pencocokan pasti
-                    "match_type": "surah_match" 
-                })
+        print(f"INFO: Pola 1.5 (Nama Surah) terdeteksi: {clean_q} -> {surah_number_match}")
         
-        if not matches:
-            raise HTTPException(status_code=404, detail=f"Surah {query} ditemukan, tapi tidak ada ayat di indeks.")
-        
-        # Kembalikan sebagai daftar
+        # KITA KEMBALIKAN FORMAT SPESIAL UNTUK REDIRECT
         return {
-            "match_type": "multiple",
-            "results": matches
+            "match_type": "single_surah", # Tipe baru!
+            "data": {
+                "surah": {
+                    "number": surah_number_match,
+                    "name": SURAH_NUMBER_TO_NAME.get(surah_number_match)
+                }
+            }
         }
 
     # === Pola 2: Pencarian Teks (Full-Text Search) ===

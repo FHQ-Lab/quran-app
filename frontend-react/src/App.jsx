@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
-// --- 1. IMPORT SEMUA KOMPONEN KITA ---
-// (Asumsi semua file ini ada di ./components/)
+// --- 1. IMPORT SEMUA KOMPONEN ---
 import Header from './components/Header';
 import HeroCard from './components/HeroCard';
 import QuickLinks from './components/QuickLinks';
@@ -9,11 +8,11 @@ import SearchBar from './components/SearchBar';
 import SurahCard from './components/SurahCard';
 import ResultsArea from './components/ResultsArea';
 import Chatbot from './components/Chatbot';
-import './components/Chatbot.css'; // CSS untuk Chatbot (tetap terpisah)
-import SurahDetail from './components/SurahDetail'; // <-- Tambahkan ini
+import './components/Chatbot.css'; 
+import SurahDetail from './components/SurahDetail';
 
 
-// Cek SpeechRecognition API (Tetap di sini)
+// Cek SpeechRecognition API
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = SpeechRecognition ? new SpeechRecognition() : null;
 if (recognition) {
@@ -22,23 +21,14 @@ if (recognition) {
   recognition.interimResults = false;
 }
 
-// --- DATA DUMMY (NANTI KITA PINDAHKAN) ---
-// Data dummy untuk daftar surah
-const surahList = [
-  { id: 1, number: 1, name: "Al-Fatihah", details: "Makkiyyah • 7 Ayat", arabicName: "الفاتحة" },
-  { id: 2, number: 2, name: "Al-Baqarah", details: "Madaniyah • 286 Ayat", arabicName: "البقرة" },
-  { id: 3, number: 3, name: "Ali 'Imran", details: "Madaniyah • 200 Ayat", arabicName: "آل عمران" },
-  { id: 4, number: 4, name: "An-Nisa'", details: "Madaniyah • 176 Ayat", arabicName: "النساء" },
-  { id: 5, number: 5, name: "Al-Ma'idah", details: "Madaniyah • 120 Ayat", arabicName: "المائدة" },
-  { id: 6, number: 6, name: "Al-An'am", details: "Makkiyah • 165 Ayat", arabicName: "الأنعام" },
-];
+
 
 // =====================================================================
-// KOMPONEN UTAMA APP.JSX (File-mu)
+// KOMPONEN UTAMA
 // =====================================================================
-function App() { // <-- Kita ganti namanya kembali ke 'App'
+function App() { 
   
-  // === 2. SEMUA STATE KITA ===
+  // === 2. SEMUA STATE ===
   const [searchInput, setSearchInput] = useState('');
   const [searchResult, setSearchResult] = useState(null);
   const [multipleResults, setMultipleResults] = useState([]);
@@ -48,8 +38,31 @@ function App() { // <-- Kita ganti namanya kembali ke 'App'
   const [spokenQuery, setSpokenQuery] = useState("");
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [selectedSurahId, setSelectedSurahId] = useState(null);
+  const [initialTargetAyah, setInitialTargetAyah] = useState(null);
+  const [allSurahs, setAllSurahs] = useState([]);
+  const [isSurahListLoading, setIsSurahListLoading] = useState(true); 
 
-  // === 3. SEMUA FUNGSI HANDLER KITA (YANG HILANG) ===
+  // === FETCH DAFTAR 114 SURAT SAAT STARTUP ===
+  useEffect(() => {
+    const fetchAllSurahs = async () => {
+      try {
+        setIsSurahListLoading(true);
+        // memanggil endpoint yang memberikan list semua surat
+        const response = await fetch('https://quran-api-id.vercel.app/surah');
+        const data = await response.json();
+        
+        setAllSurahs(data.data); 
+      } catch (error) {
+        console.error("Gagal memuat daftar surat:", error);
+      } finally {
+        setIsSurahListLoading(false);
+      }
+    };
+
+    fetchAllSurahs();
+  }, []);
+
+  // === 3. SEMUA FUNGSI HANDLER ===
 
   // Fungsi ini dipanggil saat kartu surat diklik
   const handleSurahClick = (id) => {
@@ -59,8 +72,12 @@ function App() { // <-- Kita ganti namanya kembali ke 'App'
   if (selectedSurahId) {
     return (
       <SurahDetail 
-        surahNumber={selectedSurahId} 
-        onBack={() => setSelectedSurahId(null)} // Tombol kembali meng-null-kan state
+        surahNumber={selectedSurahId}
+        initialTargetAyah={initialTargetAyah} 
+        onBack={() =>{
+          setSelectedSurahId(null)
+          setInitialTargetAyah(null);
+        }}
       />
     );
   }
@@ -77,12 +94,37 @@ function App() { // <-- Kita ganti namanya kembali ke 'App'
         throw new Error(errorData.detail || 'Pencarian gagal.');
       }
       const apiResponse = await response.json();
+      // === LOGIKA HANDLING RESPONS BARU ===
+
+      // Kasus A: Hasil Banyak (Vector Search / Pencarian Teks)
       if (apiResponse.match_type === "multiple") {
         setMultipleResults(apiResponse.results);
         setSearchResult(null);
-      } else {
-        setSearchResult(apiResponse.data);
+      } 
+      
+      // Kasus B: Redirect ke Surah (Pencarian Nama Surah Saja)
+      else if (apiResponse.match_type === "single_surah") {
+        // Langsung pindah halaman ke nomor surat tersebut
+        setSelectedSurahId(apiResponse.data.surah.number);
+        setInitialTargetAyah(null); // Tidak scroll ke ayat tertentu, cuma buka surat
+        
+        // Reset UI
         setMultipleResults([]);
+        setSearchResult(null);
+        setSearchInput("");
+      }
+      
+      // Kasus C: Hasil Tunggal Spesifik (Surah + Ayat)
+      else {
+        const ayahData = apiResponse.data;
+        // Redirect DAN Scroll ke ayat
+        setInitialTargetAyah(ayahData.number.inSurah); // Set target scroll
+        setSelectedSurahId(ayahData.surah.number);     // Pindah halaman
+        
+        // Reset UI
+        setMultipleResults([]);
+        setSearchResult(null);
+        setSearchInput("");
       }
     } catch (err) {
       setError(err.message);
@@ -111,8 +153,15 @@ function App() { // <-- Kita ganti namanya kembali ke 'App'
         setMultipleResults(apiResponse.results);
         setSearchResult(null);
       } else {
-        setSearchResult(apiResponse.data);
+        const data = apiResponse.data; // Data ayat lengkap
+        // 1. Set target ayat untuk auto-scroll
+        setInitialTargetAyah(data.number.inSurah);
+        // 2. Pindah ke halaman Surat tersebut
+        setSelectedSurahId(data.surah.number);
+        // 3. Reset UI pencarian
         setMultipleResults([]);
+        setSearchResult(null);
+        setSearchInput(""); // Opsional: bersihkan search bar
       }
     } catch (err) {
       setError(err.message);
@@ -167,6 +216,20 @@ function App() { // <-- Kita ganti namanya kembali ke 'App'
   // Tentukan apa yang akan ditampilkan: Halaman Utama atau Halaman Hasil
   const hasSearchResults = searchResult || multipleResults.length > 0 || isLoading || error;
 
+
+
+  // === FUNGSI HANDLER QUICK LINKS ===
+  const handleQuickLinkClick = (surahId, targetAyah = null) => {
+    // 1. Set target ayat (bisa null, atau angka seperti 255)
+    setInitialTargetAyah(targetAyah);
+
+    // 2. Pindah halaman ke surat tersebut
+    setSelectedSurahId(surahId);
+
+    // 3. Scroll window ke paling atas (agar rapi saat ganti halaman)
+    window.scrollTo(0, 0);
+  };
+
   // === 4. TAMPILAN JSX (LAYOUT GABUNGAN) ===
   return (
     // Wadah aplikasi utama
@@ -214,23 +277,37 @@ function App() { // <-- Kita ganti namanya kembali ke 'App'
             />
           </div>
 
-            <QuickLinks />
+            <QuickLinks onLinkClick={handleQuickLinkClick} />
             
             {/* Daftar Surah (Grid Baru) */}
             <div className="mt-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {surahList.map((surah) => (
-                  <div key={surah.id} onClick={() => handleSurahClick(surah.id)}>
-                  <SurahCard
-                    key={surah.id}
-                    number={surah.number}
-                    name={surah.name}
-                    details={surah.details}
-                    arabicName={surah.arabicName}
-                  />
-                  </div>
-                ))}
-              </div>
+              {isSurahListLoading ? (
+                // Tampilkan Skeleton/Loading sederhana jika sedang memuat
+                <div className="text-center py-10 text-gray-500 col-span-full">
+                  Memuat 114 Surat...
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Kita map dari 'allSurahs', bukan 'surahList' lagi */}
+                  {allSurahs.map((surah) => (
+                    <div 
+                      key={surah.number} 
+                      onClick={() => handleSurahClick(surah.number)} 
+                      className="cursor-pointer"
+                    >
+                      <SurahCard
+                        number={surah.number}
+                        // API mengembalikan nama di dalam object 'name'
+                        name={surah.name.transliteration.id} 
+                        // Kita gabungkan info wahyu dan jumlah ayat
+                        details={`${surah.revelation.id} • ${surah.numberOfVerses} Ayat`}
+                        // Nama Arab pendek
+                        arabicName={surah.name.short} 
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </>
           
