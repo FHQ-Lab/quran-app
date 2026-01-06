@@ -1,0 +1,1146 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 1,
+      "nama": "Al-Fātiḥah",
+      "arabic": " الفاتحة",
+      "arti": "Pembuka",
+      "kategori_ar": "مكية",
+      "kategori": "Makkiyyah",
+      "jmlAyat": 7,
+      "ayat_ar": "٧"
+    },
+    {
+      "id": 2,
+      "nama": "Al-Baqarah",
+      "arabic": " البقرة",
+      "arti": "Sapi",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 286,
+      "ayat_ar": "٢٨٦"
+    },
+    {
+      "id": 3,
+      "nama": "Āli 'Imrān",
+      "arabic": " اٰل عمران",
+      "arti": "Keluarga Imran",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 200,
+      "ayat_ar": "٢٠٠"
+    },
+    {
+      "id": 4,
+      "nama": "An-Nisā'",
+      "arabic": " النساۤء",
+      "arti": "Perempuan",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 176,
+      "ayat_ar": "١٧٦"
+    },
+    {
+      "id": 5,
+      "nama": "Al-Mā'idah",
+      "arabic": " الماۤئدة",
+      "arti": "Hidangan",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 120,
+      "ayat_ar": "١٢٠"
+    },
+    {
+      "id": 6,
+      "nama": "Al-An'ām",
+      "arabic": " الانعام",
+      "arti": "Binatang Ternak",
+      "kategori_ar": "مكية",
+      "kategori": "Makkiyyah",
+      "jmlAyat": 165,
+      "ayat_ar": "١٦٥"
+    },
+    {
+      "id": 7,
+      "nama": "Al-A'rāf",
+      "arabic": " الاعراف",
+      "arti": "Tempat Tertinggi",
+      "kategori_ar": "مكية",
+      "kategori": "Makkiyyah",
+      "jmlAyat": 206,
+      "ayat_ar": "٢٠٦"
+    },
+    {
+      "id": 8,
+      "nama": "Al-Anfāl",
+      "arabic": " الانفال",
+      "arti": "Rampasan Perang",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 75,
+      "ayat_ar": "٧٥"
+    },
+    {
+      "id": 9,
+      "nama": "At-Taubah",
+      "arabic": " التوبة",
+      "arti": "Pengampunan",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 129,
+      "ayat_ar": "١٢٩"
+    },
+    {
+      "id": 10,
+      "nama": "Yūnus",
+      "arabic": " يونس",
+      "arti": "Yunus",
+      "kategori_ar": "مكية",
+      "kategori": "Makkiyyah",
+      "jmlAyat": 109,
+      "ayat_ar": "١٠٩"
+    },
+    {
+      "id": 11,
+      "nama": "Hūd",
+      "arabic": " هود",
+      "arti": "Hud",
+      "kategori_ar": "مكية",
+      "kategori": "Makkiyyah",
+      "jmlAyat": 123,
+      "ayat_ar": "١٢٣"
+    },
+    {
+      "id": 12,
+      "nama": "Yūsuf",
+      "arabic": " يوسف",
+      "arti": "Yusuf",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 111,
+      "ayat_ar": "١١١"
+    },
+    {
+      "id": 13,
+      "nama": "Ar-Ra'd",
+      "arabic": " الرّعد",
+      "arti": "Guruh",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 43,
+      "ayat_ar": "٤٣"
+    },
+    {
+      "id": 14,
+      "nama": "Ibrāhīm",
+      "arabic": " ابرٰهيم",
+      "arti": "Ibrahim",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 52,
+      "ayat_ar": "٥٢"
+    },
+    {
+      "id": 15,
+      "nama": "Al-Ḥijr",
+      "arabic": " الحجر",
+      "arti": "Hijr",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 99,
+      "ayat_ar": "٩٩"
+    },
+    {
+      "id": 16,
+      "nama": "An-Naḥl",
+      "arabic": " النحل",
+      "arti": "Lebah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 128,
+      "ayat_ar": "١٢٨"
+    },
+    {
+      "id": 17,
+      "nama": "Al-Isrā'",
+      "arabic": " الاسراۤء",
+      "arti": "Memperjalankan di Malam Hari",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 111,
+      "ayat_ar": "١١١"
+    },
+    {
+      "id": 18,
+      "nama": "Al-Kahf",
+      "arabic": " الكهف",
+      "arti": "Gua",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 110,
+      "ayat_ar": "١١٠"
+    },
+    {
+      "id": 19,
+      "nama": "Maryam",
+      "arabic": " مريم",
+      "arti": "Maryam",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 98,
+      "ayat_ar": "٩٨"
+    },
+    {
+      "id": 20,
+      "nama": "Ṭāhā",
+      "arabic": " طٰهٰ",
+      "arti": "Taha",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 135,
+      "ayat_ar": "١٣٥"
+    },
+    {
+      "id": 21,
+      "nama": "Al-Anbiyā'",
+      "arabic": " الانبياۤء",
+      "arti": "Para Nabi",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 112,
+      "ayat_ar": "١١٢"
+    },
+    {
+      "id": 22,
+      "nama": "Al-Ḥajj",
+      "arabic": " الحج",
+      "arti": "Haji",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 78,
+      "ayat_ar": "٧٨"
+    },
+    {
+      "id": 23,
+      "nama": "Al-Mu'minūn",
+      "arabic": " المؤمنون",
+      "arti": "Orang-Orang Mukmin",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 118,
+      "ayat_ar": "١١٨"
+    },
+    {
+      "id": 24,
+      "nama": "An-Nūr",
+      "arabic": " النّور",
+      "arti": "Cahaya",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 64,
+      "ayat_ar": "٦٤"
+    },
+    {
+      "id": 25,
+      "nama": "Al-Furqān",
+      "arabic": " الفرقان",
+      "arti": "Pembeda",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 77,
+      "ayat_ar": "٧٧"
+    },
+    {
+      "id": 26,
+      "nama": "Asy-Syu'arā'",
+      "arabic": " الشعراۤء",
+      "arti": "Para Penyair",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 227,
+      "ayat_ar": "٢٢٧"
+    },
+    {
+      "id": 27,
+      "nama": "An-Naml",
+      "arabic": " النمل",
+      "arti": "Semut",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 93,
+      "ayat_ar": "٩٣"
+    },
+    {
+      "id": 28,
+      "nama": "Al-Qaṣaṣ",
+      "arabic": " القصص",
+      "arti": "Kisah-Kisah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 88,
+      "ayat_ar": "٨٨"
+    },
+    {
+      "id": 29,
+      "nama": "Al-'Ankabūt",
+      "arabic": " العنكبوت",
+      "arti": "Laba-Laba",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 69,
+      "ayat_ar": "٦٩"
+    },
+    {
+      "id": 30,
+      "nama": "Ar-Rūm",
+      "arabic": " الرّوم",
+      "arti": "Romawi",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 60,
+      "ayat_ar": "٦٠"
+    },
+    {
+      "id": 31,
+      "nama": "Luqmān",
+      "arabic": " لقمٰن",
+      "arti": "Luqman",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 34,
+      "ayat_ar": "٣٤"
+    },
+    {
+      "id": 32,
+      "nama": "As-Sajdah",
+      "arabic": " السّجدة",
+      "arti": "Sajdah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 30,
+      "ayat_ar": "٣٠"
+    },
+    {
+      "id": 33,
+      "nama": "Al-Aḥzāb",
+      "arabic": " الاحزاب",
+      "arti": "Golongan Yang Bersekutu",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 73,
+      "ayat_ar": "٧٣"
+    },
+    {
+      "id": 34,
+      "nama": "Saba'",
+      "arabic": " سبأ",
+      "arti": "Saba'",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 54,
+      "ayat_ar": "٥٤"
+    },
+    {
+      "id": 35,
+      "nama": "Fāṭir",
+      "arabic": " فاطر",
+      "arti": "Pencipta",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 45,
+      "ayat_ar": "٤٥"
+    },
+    {
+      "id": 36,
+      "nama": "Yāsīn",
+      "arabic": " يٰسۤ",
+      "arti": "Yasin",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 83,
+      "ayat_ar": "٨٣"
+    },
+    {
+      "id": 37,
+      "nama": "Aṣ-Ṣāffāt",
+      "arabic": " الصّٰۤفّٰت",
+      "arti": "Barisan-Barisan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 182,
+      "ayat_ar": "١٨٢"
+    },
+    {
+      "id": 38,
+      "nama": "Ṣād",
+      "arabic": " ص",
+      "arti": "Sad",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 88,
+      "ayat_ar": "٨٨"
+    },
+    {
+      "id": 39,
+      "nama": "Az-Zumar",
+      "arabic": " الزمر",
+      "arti": "Rombongan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 75,
+      "ayat_ar": "٧٥"
+    },
+    {
+      "id": 40,
+      "nama": "Gāfir",
+      "arabic": " غافر",
+      "arti": "Maha Pengampun",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 85,
+      "ayat_ar": "٨٥"
+    },
+    {
+      "id": 41,
+      "nama": "Fuṣṣilat",
+      "arabic": " فصّلت",
+      "arti": "Dijelaskan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 54,
+      "ayat_ar": "٥٤"
+    },
+    {
+      "id": 42,
+      "nama": "Asy-Syūrā",
+      "arabic": " الشورى",
+      "arti": "Musyawarah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 53,
+      "ayat_ar": "٥٣"
+    },
+    {
+      "id": 43,
+      "nama": "Az-Zukhruf",
+      "arabic": " الزخرف",
+      "arti": "Perhiasan dari Emas",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 89,
+      "ayat_ar": "٨٩"
+    },
+    {
+      "id": 44,
+      "nama": "Ad-Dukhān",
+      "arabic": " الدخان",
+      "arti": "Kabut Asap",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 59,
+      "ayat_ar": "٥٩"
+    },
+    {
+      "id": 45,
+      "nama": "Al-Jāṡiyah",
+      "arabic": " الجاثية",
+      "arti": "Berlutut",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 37,
+      "ayat_ar": "٣٧"
+    },
+    {
+      "id": 46,
+      "nama": "Al-Aḥqāf",
+      "arabic": " الاحقاف",
+      "arti": "Ahqaf",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 35,
+      "ayat_ar": "٣٥"
+    },
+    {
+      "id": 47,
+      "nama": "Muḥammad",
+      "arabic": " محمّد",
+      "arti": "Nabi Muhammad",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 38,
+      "ayat_ar": "٣٨"
+    },
+    {
+      "id": 48,
+      "nama": "Al-Fatḥ",
+      "arabic": " الفتح",
+      "arti": "Kemenangan",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 29,
+      "ayat_ar": "٢٩"
+    },
+    {
+      "id": 49,
+      "nama": "Al-Ḥujurāt",
+      "arabic": " الحجرٰت",
+      "arti": "Kamar-Kamar",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 18,
+      "ayat_ar": "١٨"
+    },
+    {
+      "id": 50,
+      "nama": "Qāf",
+      "arabic": " ق",
+      "arti": "Qaf",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 45,
+      "ayat_ar": "٤٥"
+    },
+    {
+      "id": 51,
+      "nama": "Aż-Żāriyāt",
+      "arabic": " الذّٰريٰت",
+      "arti": "Yang Menerbangkan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 60,
+      "ayat_ar": "٦٠"
+    },
+    {
+      "id": 52,
+      "nama": "At-Ṭūr",
+      "arabic": " الطور",
+      "arti": "Gunung",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 49,
+      "ayat_ar": "٤٩"
+    },
+    {
+      "id": 53,
+      "nama": "An-Najm",
+      "arabic": " النجم",
+      "arti": "Bintang",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 62,
+      "ayat_ar": "٦٢"
+    },
+    {
+      "id": 54,
+      "nama": "Al-Qamar",
+      "arabic": " القمر",
+      "arti": "Bulan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 55,
+      "ayat_ar": "٥٥"
+    },
+    {
+      "id": 55,
+      "nama": "Ar-Raḥmān",
+      "arabic": " الرحمن",
+      "arti": "Yang Maha Pengasih",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 78,
+      "ayat_ar": "٧٨"
+    },
+    {
+      "id": 56,
+      "nama": "Al-Wāqi'ah",
+      "arabic": " الواقعة",
+      "arti": "Hari Kiamat Yang Pasti Terjadi",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 96,
+      "ayat_ar": "٩٦"
+    },
+    {
+      "id": 57,
+      "nama": "Al-Ḥadīd",
+      "arabic": " الحديد",
+      "arti": "Besi",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 29,
+      "ayat_ar": "٢٩"
+    },
+    {
+      "id": 58,
+      "nama": "Al-Mujādalah",
+      "arabic": " المجادلة",
+      "arti": "Gugatan",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 22,
+      "ayat_ar": "٢٢"
+    },
+    {
+      "id": 59,
+      "nama": "Al-Ḥasyr",
+      "arabic": " الحشر",
+      "arti": "Pengusiran",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 24,
+      "ayat_ar": "٢٤"
+    },
+    {
+      "id": 60,
+      "nama": "Al-Mumtaḥanah",
+      "arabic": " الممتحنة",
+      "arti": "Wanita Yang Diuji",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 13,
+      "ayat_ar": "١٣"
+    },
+    {
+      "id": 61,
+      "nama": "Aṣ-Ṣaff",
+      "arabic": " الصّفّ",
+      "arti": "Barisan",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 14,
+      "ayat_ar": "١٤"
+    },
+    {
+      "id": 62,
+      "nama": "Al-Jumu'ah",
+      "arabic": " الجمعة",
+      "arti": "Jumat",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 11,
+      "ayat_ar": "١١"
+    },
+    {
+      "id": 63,
+      "nama": "Al-Munāfiqūn",
+      "arabic": " المنٰفقون",
+      "arti": "Orang-Orang Munafik",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 11,
+      "ayat_ar": "١١"
+    },
+    {
+      "id": 64,
+      "nama": "At-Tagābun",
+      "arabic": " التغابن",
+      "arti": "Pengungkapan Kesalahan",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 18,
+      "ayat_ar": "١٨"
+    },
+    {
+      "id": 65,
+      "nama": "At-Talāq",
+      "arabic": " الطلاق",
+      "arti": "Talak",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 12,
+      "ayat_ar": "١٢"
+    },
+    {
+      "id": 66,
+      "nama": "At-Taḥrīm",
+      "arabic": " التحريم",
+      "arti": "Pengharaman",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 12,
+      "ayat_ar": "١٢"
+    },
+    {
+      "id": 67,
+      "nama": "Al-Mulk",
+      "arabic": " الملك",
+      "arti": "Kerajaan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 30,
+      "ayat_ar": "٣٠"
+    },
+    {
+      "id": 68,
+      "nama": "Al-Qalam",
+      "arabic": " القلم",
+      "arti": "Pena",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 52,
+      "ayat_ar": "٥٢"
+    },
+    {
+      "id": 69,
+      "nama": "Al-Ḥāqqah",
+      "arabic": " الحاۤقّة",
+      "arti": "Hari Kiamat yang Pasti Terjadi",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 52,
+      "ayat_ar": "٥٢"
+    },
+    {
+      "id": 70,
+      "nama": "Al-Ma'ārij",
+      "arabic": " المعارج",
+      "arti": "Tempat-Tempat Naik",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 44,
+      "ayat_ar": "٤٤"
+    },
+    {
+      "id": 71,
+      "nama": "Nūḥ",
+      "arabic": " نوح",
+      "arti": "Nuh",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 28,
+      "ayat_ar": "٢٨"
+    },
+    {
+      "id": 72,
+      "nama": "Al-Jinn",
+      "arabic": " الجن",
+      "arti": "Jin",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 28,
+      "ayat_ar": "٢٨"
+    },
+    {
+      "id": 73,
+      "nama": "Al-Muzzammil",
+      "arabic": " المزّمّل",
+      "arti": "Orang Yang Berkelumun",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 20,
+      "ayat_ar": "٢٠"
+    },
+    {
+      "id": 74,
+      "nama": "Al-Muddaṡṡir",
+      "arabic": " المدّثّر",
+      "arti": "Orang Yang Berselimut",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 56,
+      "ayat_ar": "٥٦"
+    },
+    {
+      "id": 75,
+      "nama": "Al-Qiyāmah",
+      "arabic": " القيٰمة",
+      "arti": "Hari Kiamat",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 40,
+      "ayat_ar": "٤٠"
+    },
+    {
+      "id": 76,
+      "nama": "Al-Insān",
+      "arabic": " الانسان",
+      "arti": "Manusia",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 31,
+      "ayat_ar": "٣١"
+    },
+    {
+      "id": 77,
+      "nama": "Al-Mursalāt",
+      "arabic": " المرسلٰت",
+      "arti": "Malaikat Yang Diutus",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 50,
+      "ayat_ar": "٥٠"
+    },
+    {
+      "id": 78,
+      "nama": "An-Naba'",
+      "arabic": " النبأ",
+      "arti": "Berita",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 40,
+      "ayat_ar": "٤٠"
+    },
+    {
+      "id": 79,
+      "nama": "An-Nāzi'āt",
+      "arabic": " النّٰزعٰت",
+      "arti": "Yang Mencabut dengan Keras",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 46,
+      "ayat_ar": "٤٦"
+    },
+    {
+      "id": 80,
+      "nama": "'Abasa",
+      "arabic": " عبس",
+      "arti": "Berwajah Masam",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 42,
+      "ayat_ar": "٤٢"
+    },
+    {
+      "id": 81,
+      "nama": "At-Takwīr",
+      "arabic": " التكوير",
+      "arti": "Penggulungan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 29,
+      "ayat_ar": "٢٩"
+    },
+    {
+      "id": 82,
+      "nama": "Al-Infiṭār",
+      "arabic": " الانفطار",
+      "arti": "Terbelah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 19,
+      "ayat_ar": "١٩"
+    },
+    {
+      "id": 83,
+      "nama": "Al-Muṭaffifīn",
+      "arabic": " المطفّفين",
+      "arti": "Orang-Orang Yang Curang",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 36,
+      "ayat_ar": "٣٦"
+    },
+    {
+      "id": 84,
+      "nama": "Al-Insyiqāq",
+      "arabic": " الانشقاق",
+      "arti": "Terbelah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 25,
+      "ayat_ar": "٢٥"
+    },
+    {
+      "id": 85,
+      "nama": "Al-Burūj",
+      "arabic": " البروج",
+      "arti": "Gugusan Bintang",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 22,
+      "ayat_ar": "٢٢"
+    },
+    {
+      "id": 86,
+      "nama": "At-Ṭāriq",
+      "arabic": " الطارق",
+      "arti": "Yang Datang Pada Malam Hari",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 17,
+      "ayat_ar": "١٧"
+    },
+    {
+      "id": 87,
+      "nama": "Al-A'lā",
+      "arabic": " الاعلى",
+      "arti": "Yang Maha Tinggi",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 19,
+      "ayat_ar": "١٩"
+    },
+    {
+      "id": 88,
+      "nama": "Al-Gāsyiyah",
+      "arabic": " الغاشية",
+      "arti": "Hari Kiamat Yang Menghilangkan Kesadaran",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 26,
+      "ayat_ar": "٢٦"
+    },
+    {
+      "id": 89,
+      "nama": "Al-Fajr",
+      "arabic": " الفجر",
+      "arti": "Fajar",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 30,
+      "ayat_ar": "٣٠"
+    },
+    {
+      "id": 90,
+      "nama": "Al-Balad",
+      "arabic": " البلد",
+      "arti": "Negeri",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 20,
+      "ayat_ar": "٢٠"
+    },
+    {
+      "id": 91,
+      "nama": "Asy-Syams",
+      "arabic": " الشمس",
+      "arti": "Matahari",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 15,
+      "ayat_ar": "١٥"
+    },
+    {
+      "id": 92,
+      "nama": "Al-Lail",
+      "arabic": " الّيل",
+      "arti": "Malam",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 21,
+      "ayat_ar": "٢١"
+    },
+    {
+      "id": 93,
+      "nama": "Ad-Duḥā",
+      "arabic": " الضحى",
+      "arti": "Duha",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 11,
+      "ayat_ar": "١١"
+    },
+    {
+      "id": 94,
+      "nama": "Asy-Syarḥ",
+      "arabic": " الشرح",
+      "arti": "Pelapangan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 8,
+      "ayat_ar": "٨"
+    },
+    {
+      "id": 95,
+      "nama": "At-Tīn",
+      "arabic": " التين",
+      "arti": "Buah Tin",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 8,
+      "ayat_ar": "٨"
+    },
+    {
+      "id": 96,
+      "nama": "Al-'Alaq",
+      "arabic": " العلق",
+      "arti": "Segumpal Darah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 19,
+      "ayat_ar": "١٩"
+    },
+    {
+      "id": 97,
+      "nama": "Al-Qadr",
+      "arabic": " القدر",
+      "arti": "Al-Qadar",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 5,
+      "ayat_ar": "٥"
+    },
+    {
+      "id": 98,
+      "nama": "Al-Bayyinah",
+      "arabic": " البيّنة",
+      "arti": "Bukti Nyata",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 8,
+      "ayat_ar": "٨"
+    },
+    {
+      "id": 99,
+      "nama": "Az-Zalzalah",
+      "arabic": " الزلزلة",
+      "arti": "Guncangan",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 8,
+      "ayat_ar": "٨"
+    },
+    {
+      "id": 100,
+      "nama": "Al-'Adiyāt",
+      "arabic": " العٰديٰت",
+      "arti": "Kuda Perang Yang Berlari Kencang",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 11,
+      "ayat_ar": "١١"
+    },
+    {
+      "id": 101,
+      "nama": "Al-Qāri'ah",
+      "arabic": " القارعة",
+      "arti": "Al-Qāri'ah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 11,
+      "ayat_ar": "١١"
+    },
+    {
+      "id": 102,
+      "nama": "At-Takāṡur",
+      "arabic": " التكاثر",
+      "arti": "Berbangga-Bangga Dalam Memperbanyak Dunia",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 8,
+      "ayat_ar": "٨"
+    },
+    {
+      "id": 103,
+      "nama": "Al-'Aṣr",
+      "arabic": " العصر",
+      "arti": "Masa",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 3,
+      "ayat_ar": "٣"
+    },
+    {
+      "id": 104,
+      "nama": "Al-Humazah",
+      "arabic": " الهمزة",
+      "arti": "Pengumpat",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 9,
+      "ayat_ar": "٩"
+    },
+    {
+      "id": 105,
+      "nama": "Al-Fīl",
+      "arabic": " الفيل",
+      "arti": "Gajah",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 5,
+      "ayat_ar": "٥"
+    },
+    {
+      "id": 106,
+      "nama": "Quraisy",
+      "arabic": " قريش",
+      "arti": "Orang Quraisy",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 4,
+      "ayat_ar": "٤"
+    },
+    {
+      "id": 107,
+      "nama": "Al-Mā'ūn",
+      "arabic": " الماعون",
+      "arti": "Bantuan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 7,
+      "ayat_ar": "٧"
+    },
+    {
+      "id": 108,
+      "nama": "Al-Kauṡar",
+      "arabic": " الكوثر",
+      "arti": "Nikmat Yang Banyak",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 3,
+      "ayat_ar": "٣"
+    },
+    {
+      "id": 109,
+      "nama": "Al-Kāfirūn",
+      "arabic": " الكٰفرون",
+      "arti": "Orang-Orang kafir",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 6,
+      "ayat_ar": "٦"
+    },
+    {
+      "id": 110,
+      "nama": "An-Naṣr",
+      "arabic": " النصر",
+      "arti": "Pertolongan",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 3,
+      "ayat_ar": "٣"
+    },
+    {
+      "id": 111,
+      "nama": "Al-Lahab",
+      "arabic": " اللهب",
+      "arti": "Gejolak Api",
+      "kategori_ar": "مكية",
+      "kategori": "Makiyyah",
+      "jmlAyat": 5,
+      "ayat_ar": "٥"
+    },
+    {
+      "id": 112,
+      "nama": "Al-Ikhlāṣ",
+      "arabic": " الاخلاص",
+      "arti": "Ikhlas",
+      "kategori_ar": "مكية",
+      "kategori": "Makkiyyah",
+      "jmlAyat": 4,
+      "ayat_ar": "٤"
+    },
+    {
+      "id": 113,
+      "nama": "Al-Falaq",
+      "arabic": " الفلق",
+      "arti": "Fajar",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 5,
+      "ayat_ar": "٥"
+    },
+    {
+      "id": 114,
+      "nama": "An-Nās",
+      "arabic": " الناس",
+      "arti": "Manusia",
+      "kategori_ar": "مدنية",
+      "kategori": "Madaniyyah",
+      "jmlAyat": 6,
+      "ayat_ar": "٦"
+    }
+  ]
+}

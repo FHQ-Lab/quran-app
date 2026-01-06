@@ -1,0 +1,23 @@
+name: Sync to Hugging Face Hub
+
+on:
+  push:
+    branches: [main] # Atau 'master' jika branch utamamu master
+
+  # Agar bisa dijalankan manual juga lewat tab Actions
+  workflow_dispatch:
+
+jobs:
+  sync-to-hub:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          lfs: true
+      
+      - name: Push to hub
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+            git push https://FHQ360:$HF_TOKEN@huggingface.co/spaces/FHQ360/backend-quran-app main --force

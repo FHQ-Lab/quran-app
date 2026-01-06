@@ -1,0 +1,76 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6217,
+      "surah": 111,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 603,
+      "teks_msi_usmani": "تَبَّتْ يَدَآ اَبِيْ لَهَبٍ وَّتَبَّۗ",
+      "teks_gundul": "تبت يدا أبي لهب وتب",
+      "teks": "Tabbat yadā abī lahabiw wa tabb(a).",
+      "keterangan": "",
+      "terjemah": "Binasalah kedua tangan Abu Lahab dan benar-benar binasa dia.763)",
+      "no_foot": "763",
+      "teks_foot": "763) Yang dimaksud dengan kedua tangan Abu Lahab adalah Abu Lahab itu sendiri."
+    },
+    {
+      "id": 6218,
+      "surah": 111,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 603,
+      "teks_msi_usmani": "مَآ اَغْنٰى عَنْهُ مَالُهٗ وَمَا كَسَبَۗ",
+      "teks_gundul": "ما أغنى عنه ماله وما كسب",
+      "teks": "Mā agnā ‘anhu māluhū wa mā kasab(a).",
+      "keterangan": "",
+      "terjemah": "Tidaklah berguna baginya hartanya dan apa yang dia usahakan.",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6219,
+      "surah": 111,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 603,
+      "teks_msi_usmani": "سَيَصْلٰى نَارًا ذَاتَ لَهَبٍۙ",
+      "teks_gundul": "سيصلى نارا ذات لهب",
+      "teks": "Sayaṣlā nāran żāta lahab(in).",
+      "keterangan": "",
+      "terjemah": "Kelak dia akan memasuki api yang bergejolak (neraka),",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6220,
+      "surah": 111,
+      "ayat": 4,
+      "juz": 30,
+      "halaman": 603,
+      "teks_msi_usmani": "وَّامْرَاَتُهٗ ۗحَمَّالَةَ الْحَطَبِۚ",
+      "teks_gundul": "وامرأته حمالة الحطب",
+      "teks": "Wamra'atuh(ū), ḥammālatal-ḥaṭab(i).",
+      "keterangan": "",
+      "terjemah": "(begitu pula) istrinya, pembawa kayu bakar (penyebar fitnah). ",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6221,
+      "surah": 111,
+      "ayat": 5,
+      "juz": 30,
+      "halaman": 603,
+      "teks_msi_usmani": "فِيْ جِيْدِهَا حَبْلٌ مِّنْ مَّسَدٍ ࣖ",
+      "teks_gundul": "في جيدها حبل من مسد",
+      "teks": "Fī jīdihā ḥablum mim masad(in).",
+      "keterangan": "",
+      "terjemah": "Di lehernya ada tali dari sabut yang dipintal.",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

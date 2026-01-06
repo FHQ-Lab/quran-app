@@ -1,0 +1,48 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6214,
+      "surah": 110,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 603,
+      "teks_msi_usmani": "اِذَا جَاۤءَ نَصْرُ اللّٰهِ وَالْفَتْحُۙ",
+      "teks_gundul": "إذا جاء نصر الله والفتح",
+      "teks": "Iżā jā'a naṣrullāhi wal-fatḥ(u).",
+      "keterangan": "",
+      "terjemah": "Apabila telah datang pertolongan Allah dan kemenangan",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6215,
+      "surah": 110,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 603,
+      "teks_msi_usmani": "وَرَاَيْتَ النَّاسَ يَدْخُلُوْنَ فِيْ دِيْنِ اللّٰهِ اَفْوَاجًاۙ",
+      "teks_gundul": "ورأيت الناس يدخلون في دين الله أفواجا",
+      "teks": "Wa ra'aitan-nāsa yadkhulūna fī dīnillāhi afwājā(n).",
+      "keterangan": "",
+      "terjemah": "dan engkau melihat manusia berbondong-bondong masuk agama Allah,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6216,
+      "surah": 110,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 603,
+      "teks_msi_usmani": "فَسَبِّحْ بِحَمْدِ رَبِّكَ وَاسْتَغْفِرْهُۗ اِنَّهٗ كَانَ تَوَّابًا ࣖ",
+      "teks_gundul": "فسبح بحمد ربك واستغفره إنه كان توابا",
+      "teks": "Fasabbiḥ biḥamdi rabbika wastagfirh(u), innahū kāna tawwābā(n).",
+      "keterangan": "",
+      "terjemah": "bertasbihlah dengan memuji Tuhanmu dan mohonlah ampun kepada-Nya. Sesungguhnya Dia Maha Penerima tobat.",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

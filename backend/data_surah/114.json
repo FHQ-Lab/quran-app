@@ -1,0 +1,90 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6231,
+      "surah": 114,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "قُلْ اَعُوْذُ بِرَبِّ النَّاسِۙ",
+      "teks_gundul": "قل أعوذ برب الناس",
+      "teks": "Qul a‘ūżu birabbin-nās(i).",
+      "keterangan": "",
+      "terjemah": "Katakanlah (Nabi Muhammad), “Aku berlindung kepada Tuhan manusia,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6232,
+      "surah": 114,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "مَلِكِ النَّاسِۙ",
+      "teks_gundul": "ملك الناس",
+      "teks": "Malikin-nās(i).",
+      "keterangan": "",
+      "terjemah": "raja manusia,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6233,
+      "surah": 114,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "اِلٰهِ النَّاسِۙ",
+      "teks_gundul": "إله الناس",
+      "teks": "Ilāhin-nās(i).",
+      "keterangan": "",
+      "terjemah": "sembahan manusia",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6234,
+      "surah": 114,
+      "ayat": 4,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "مِنْ شَرِّ الْوَسْوَاسِ ەۙ الْخَنَّاسِۖ",
+      "teks_gundul": "من شر الوسواس الخناس",
+      "teks": "Min syarril-waswāsil-khannās(i).",
+      "keterangan": "",
+      "terjemah": "dari kejahatan (setan) pembisik yang bersembunyi",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6235,
+      "surah": 114,
+      "ayat": 5,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "الَّذِيْ يُوَسْوِسُ فِيْ صُدُوْرِ النَّاسِۙ",
+      "teks_gundul": "الذي يوسوس في صدور الناس",
+      "teks": "Allażī yuwaswisu fī ṣudūrin-nās(i).",
+      "keterangan": "",
+      "terjemah": "yang membisikkan (kejahatan) ke dalam dada manusia,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6236,
+      "surah": 114,
+      "ayat": 6,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "مِنَ الْجِنَّةِ وَالنَّاسِ ࣖ ",
+      "teks_gundul": "من الجنة والناس",
+      "teks": "Minal jinnati wan-nās(i).",
+      "keterangan": "",
+      "terjemah": "dari (golongan) jin dan manusia.”",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

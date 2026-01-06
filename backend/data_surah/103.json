@@ -1,0 +1,48 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6177,
+      "surah": 103,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 601,
+      "teks_msi_usmani": "وَالْعَصْرِۙ",
+      "teks_gundul": "والعصر",
+      "teks": "Wal-‘aṣr(i).",
+      "keterangan": "",
+      "terjemah": "Demi masa,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6178,
+      "surah": 103,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 601,
+      "teks_msi_usmani": "اِنَّ الْاِنْسَانَ لَفِيْ خُسْرٍۙ",
+      "teks_gundul": "إن الإنسان لفي خسر",
+      "teks": "Innal-insāna lafī khusr(in).",
+      "keterangan": "",
+      "terjemah": "sesungguhnya manusia benar-benar berada dalam kerugian,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6179,
+      "surah": 103,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 601,
+      "teks_msi_usmani": "اِلَّا الَّذِيْنَ اٰمَنُوْا وَعَمِلُوا الصّٰلِحٰتِ وَتَوَاصَوْا بِالْحَقِّ ەۙ وَتَوَاصَوْا بِالصَّبْرِ ࣖ",
+      "teks_gundul": "إلا الذين امنوا وعملوا الصالحات وتواصوا بالحق وتواصوا بالصبر",
+      "teks": "Illal-lażīna āmanū wa ‘amiluṣ-ṣāliḥāti wa tawāṣau bil-ḥaqq(i), wa tawāṣau biṣ-ṣabr(i).",
+      "keterangan": "",
+      "terjemah": "kecuali orang-orang yang beriman dan beramal saleh serta saling menasihati untuk kebenaran dan kesabaran.",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

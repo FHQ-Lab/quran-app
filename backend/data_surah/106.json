@@ -1,0 +1,62 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6194,
+      "surah": 106,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 602,
+      "teks_msi_usmani": "لِاِيْلٰفِ قُرَيْشٍۙ",
+      "teks_gundul": "لإيلاف قريش",
+      "teks": "Li'īlāfi quraisy(in).",
+      "keterangan": "",
+      "terjemah": "Disebabkan oleh kebiasaan orang-orang Quraisy,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6195,
+      "surah": 106,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 602,
+      "teks_msi_usmani": "اٖلٰفِهِمْ رِحْلَةَ الشِّتَاۤءِ وَالصَّيْفِۚ",
+      "teks_gundul": "إيلافهم رحلة الشتاء والصيف",
+      "teks": "´lāfihim riḥlatasy-syitā'i waṣ-ṣaif(i).",
+      "keterangan": "",
+      "terjemah": "(yaitu) kebiasaan mereka bepergian pada musim dingin dan musim panas (sehingga mendapatkan banyak keuntungan),",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6196,
+      "surah": 106,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 602,
+      "teks_msi_usmani": "فَلْيَعْبُدُوْا رَبَّ هٰذَا الْبَيْتِۙ",
+      "teks_gundul": "فليعبدوا رب هذا البيت",
+      "teks": "Falya‘budū rabba hāżal-bait(i).",
+      "keterangan": "",
+      "terjemah": "maka hendaklah mereka menyembah Tuhan (pemilik) rumah ini (Ka‘bah)",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6197,
+      "surah": 106,
+      "ayat": 4,
+      "juz": 30,
+      "halaman": 602,
+      "teks_msi_usmani": "الَّذِيْٓ اَطْعَمَهُمْ مِّنْ جُوْعٍ ەۙ وَّاٰمَنَهُمْ مِّنْ خَوْفٍ ࣖ",
+      "teks_gundul": "الذي أطعمهم من جوع وامنهم من خوف",
+      "teks": "Allażī aṭ‘amahum min jū‘(in), wa āmanahum min khauf(in).",
+      "keterangan": "",
+      "terjemah": "yang telah memberi mereka makanan untuk menghilangkan lapar dan mengamankan mereka dari rasa takut.",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

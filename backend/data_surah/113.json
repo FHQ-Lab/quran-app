@@ -1,0 +1,76 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6226,
+      "surah": 113,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "قُلْ اَعُوْذُ بِرَبِّ الْفَلَقِۙ",
+      "teks_gundul": "قل أعوذ برب الفلق",
+      "teks": "Qul a‘ūżu birabbil-falaq(i).",
+      "keterangan": "",
+      "terjemah": "Katakanlah (Nabi Muhammad), “Aku berlindung kepada Tuhan yang (menjaga) fajar (subuh) ",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6227,
+      "surah": 113,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "مِنْ شَرِّ مَا خَلَقَۙ",
+      "teks_gundul": "من شر ما خلق",
+      "teks": "Min syarri mā khalaq(a).",
+      "keterangan": "",
+      "terjemah": "dari kejahatan (makhluk yang) Dia ciptakan,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6228,
+      "surah": 113,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "وَمِنْ شَرِّ غَاسِقٍ اِذَا وَقَبَۙ",
+      "teks_gundul": "ومن شر غاسق إذا وقب",
+      "teks": "Wa min syarri gāsiqin iżā waqab(a).",
+      "keterangan": "",
+      "terjemah": "dari kejahatan malam apabila telah gelap gulita,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6229,
+      "surah": 113,
+      "ayat": 4,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "وَمِنْ شَرِّ النَّفّٰثٰتِ فِى الْعُقَدِۙ",
+      "teks_gundul": "ومن شر النفاثات في العقد",
+      "teks": "Wa min syarrin-naffāṡāti fil-‘uqad(i).",
+      "keterangan": "",
+      "terjemah": "dari kejahatan perempuan-perempuan (penyihir) yang meniup pada buhul-buhul (talinya),",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6230,
+      "surah": 113,
+      "ayat": 5,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "وَمِنْ شَرِّ حَاسِدٍ اِذَا حَسَدَ ࣖ",
+      "teks_gundul": "ومن شر حاسد إذا حسد",
+      "teks": "Wa min syarri ḥāsidin iżā ḥasad(a).",
+      "keterangan": "",
+      "terjemah": "dan dari kejahatan orang yang dengki apabila dia dengki.”",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

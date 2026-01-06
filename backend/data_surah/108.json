@@ -1,0 +1,48 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6205,
+      "surah": 108,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 602,
+      "teks_msi_usmani": "اِنَّآ اَعْطَيْنٰكَ الْكَوْثَرَۗ",
+      "teks_gundul": "إنا أعطيناك الكوثر",
+      "teks": "Innā a‘ṭainākal-kauṡar(a).",
+      "keterangan": "",
+      "terjemah": "Sesungguhnya Kami telah memberimu (Nabi Muhammad) nikmat yang banyak.",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6206,
+      "surah": 108,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 602,
+      "teks_msi_usmani": "فَصَلِّ لِرَبِّكَ وَانْحَرْۗ",
+      "teks_gundul": "فصل لربك وانحر",
+      "teks": "Faṣalli lirabbika wanḥar.",
+      "keterangan": "",
+      "terjemah": "Maka, laksanakanlah salat karena Tuhanmu dan berkurbanlah!",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6207,
+      "surah": 108,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 602,
+      "teks_msi_usmani": "اِنَّ شَانِئَكَ هُوَ الْاَبْتَرُ ࣖ",
+      "teks_gundul": "إن شانئك هو الأبتر",
+      "teks": "Inna syāni'aka huwal-abtar(u).",
+      "keterangan": "",
+      "terjemah": "Sesungguhnya orang yang membencimu, dialah yang terputus (dari rahmat Allah).",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

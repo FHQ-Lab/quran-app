@@ -1,0 +1,62 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6222,
+      "surah": 112,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "قُلْ هُوَ اللّٰهُ اَحَدٌۚ",
+      "teks_gundul": "قل هو الله أحد",
+      "teks": "Qul huwallāhu aḥad(un).",
+      "keterangan": "",
+      "terjemah": "Katakanlah (Nabi Muhammad), “Dialah Allah Yang Maha Esa.",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6223,
+      "surah": 112,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "اَللّٰهُ الصَّمَدُۚ",
+      "teks_gundul": "الله الصمد",
+      "teks": "Allāhuṣ-ṣamad(u).",
+      "keterangan": "",
+      "terjemah": "Allah tempat meminta segala sesuatu.",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6224,
+      "surah": 112,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "لَمْ يَلِدْ وَلَمْ يُوْلَدْۙ",
+      "teks_gundul": "لم يلد ولم يولد",
+      "teks": "Lam yalid wa lam yūlad.",
+      "keterangan": "",
+      "terjemah": "Dia tidak beranak dan tidak pula diperanakkan",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6225,
+      "surah": 112,
+      "ayat": 4,
+      "juz": 30,
+      "halaman": 604,
+      "teks_msi_usmani": "وَلَمْ يَكُنْ لَّهٗ كُفُوًا اَحَدٌ ࣖ",
+      "teks_gundul": "ولم يكن له كفوا أحد",
+      "teks": "Wa lam yakul lahū kufuwan aḥad(un).",
+      "keterangan": "",
+      "terjemah": "serta tidak ada sesuatu pun yang setara dengan-Nya.”",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

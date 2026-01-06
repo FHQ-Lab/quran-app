@@ -1,0 +1,76 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6189,
+      "surah": 105,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 601,
+      "teks_msi_usmani": "اَلَمْ تَرَ كَيْفَ فَعَلَ رَبُّكَ بِاَصْحٰبِ الْفِيْلِۗ",
+      "teks_gundul": "ألم تر كيف فعل ربك بأصحاب الفيل",
+      "teks": "Alam tara kaifa fa‘ala rabbuka bi'aṣḥābil-fīl(i).",
+      "keterangan": "",
+      "terjemah": "Tidakkah engkau (Nabi Muhammad) memperhatikan bagaimana Tuhanmu telah bertindak terhadap pasukan bergajah?",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6190,
+      "surah": 105,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 601,
+      "teks_msi_usmani": "اَلَمْ يَجْعَلْ كَيْدَهُمْ فِيْ تَضْلِيْلٍۙ",
+      "teks_gundul": "ألم يجعل كيدهم في تضليل",
+      "teks": "Alam yaj‘al kaidahum fī taḍlīl(in).",
+      "keterangan": "",
+      "terjemah": "Bukankah Dia telah menjadikan tipu daya mereka itu sia-sia?",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6191,
+      "surah": 105,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 601,
+      "teks_msi_usmani": "وَّاَرْسَلَ عَلَيْهِمْ طَيْرًا اَبَابِيْلَۙ",
+      "teks_gundul": "وأرسل عليهم طيرا أبابيل",
+      "teks": "Wa arsala ‘alaihim ṭairan abābīl(a).",
+      "keterangan": "",
+      "terjemah": "Dia mengirimkan kepada mereka burung yang berbondong-bondong",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6192,
+      "surah": 105,
+      "ayat": 4,
+      "juz": 30,
+      "halaman": 601,
+      "teks_msi_usmani": "تَرْمِيْهِمْ بِحِجَارَةٍ مِّنْ سِجِّيْلٍۙ",
+      "teks_gundul": "ترميهم بحجارة من سجيل",
+      "teks": "Tarmīhim biḥijāratim min sijjīl(in).",
+      "keterangan": "",
+      "terjemah": "yang melempari mereka dengan batu dari tanah liat yang dibakar,",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6193,
+      "surah": 105,
+      "ayat": 5,
+      "juz": 30,
+      "halaman": 601,
+      "teks_msi_usmani": "فَجَعَلَهُمْ كَعَصْفٍ مَّأْكُوْلٍ ࣖ ",
+      "teks_gundul": "فجعلهم كعصف مأكول",
+      "teks": "Fa ja‘alahum ka‘aṣfim ma'kūl(in).",
+      "keterangan": "",
+      "terjemah": "sehingga Dia menjadikan mereka seperti daun-daun yang dimakan (ulat).",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

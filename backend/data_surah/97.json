@@ -1,0 +1,76 @@
+{
+  "code": 200,
+  "res": "success",
+  "data": [
+    {
+      "id": 6126,
+      "surah": 97,
+      "ayat": 1,
+      "juz": 30,
+      "halaman": 598,
+      "teks_msi_usmani": "اِنَّآ اَنْزَلْنٰهُ فِيْ لَيْلَةِ الْقَدْرِ ",
+      "teks_gundul": "إنا أنزلناه في ليلة القدر",
+      "teks": "Innā anzalnāhu fī lailatil-qadr(i).",
+      "keterangan": "",
+      "terjemah": "Sesungguhnya Kami telah menurunkannya (Al-Qur’an) pada Lailatulqadar.",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6127,
+      "surah": 97,
+      "ayat": 2,
+      "juz": 30,
+      "halaman": 598,
+      "teks_msi_usmani": "وَمَآ اَدْرٰىكَ مَا لَيْلَةُ الْقَدْرِۗ",
+      "teks_gundul": "وما أدراك ما ليلة القدر",
+      "teks": "Wa mā adrāka mā lailatul-qadr(i).",
+      "keterangan": "",
+      "terjemah": "Tahukah kamu apakah Lailatulqadar itu?",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6128,
+      "surah": 97,
+      "ayat": 3,
+      "juz": 30,
+      "halaman": 598,
+      "teks_msi_usmani": "لَيْلَةُ الْقَدْرِ ەۙ خَيْرٌ مِّنْ اَلْفِ شَهْرٍۗ",
+      "teks_gundul": "ليلة القدر خير من ألف شهر",
+      "teks": "Lailatul-qadri khairum min alfi syahr(in).",
+      "keterangan": "",
+      "terjemah": "Lailatulqadar itu lebih baik daripada seribu bulan.",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6129,
+      "surah": 97,
+      "ayat": 4,
+      "juz": 30,
+      "halaman": 598,
+      "teks_msi_usmani": "تَنَزَّلُ الْمَلٰۤىِٕكَةُ وَالرُّوْحُ فِيْهَا بِاِذْنِ رَبِّهِمْۚ مِنْ كُلِّ اَمْرٍۛ",
+      "teks_gundul": "تنزل الملائكة والروح فيها بإذن ربهم من كل أمر",
+      "teks": "Tanazzalul-malā'ikatu war rūḥu fīhā bi'iżni rabbihim min kulli amr(in).",
+      "keterangan": "",
+      "terjemah": "Pada malam itu turun para malaikat dan Rūḥ (Jibril) dengan izin Tuhannya untuk mengatur semua urusan.",
+      "no_foot": "",
+      "teks_foot": ""
+    },
+    {
+      "id": 6130,
+      "surah": 97,
+      "ayat": 5,
+      "juz": 30,
+      "halaman": 598,
+      "teks_msi_usmani": "سَلٰمٌ ۛهِيَ حَتّٰى مَطْلَعِ الْفَجْرِ ࣖ",
+      "teks_gundul": "سلام هي حتى مطلع الفجر",
+      "teks": "Salāmun hiya ḥattā maṭla‘il-fajr(i). ",
+      "keterangan": "",
+      "terjemah": "Sejahteralah (malam) itu sampai terbit fajar.",
+      "no_foot": "",
+      "teks_foot": ""
+    }
+  ]
+}

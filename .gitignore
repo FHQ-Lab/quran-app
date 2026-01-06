@@ -1,0 +1,26 @@
+# Python virtual environment
+backend/venv/
+.env
+.venv
+venv/
+
+# Python cache
+backend/__pycache__/
+backend/*.pyc
+
+#API GEMINI
+backend/.env
+
+# Node.js dependencies (sangat besar!)
+frontend-react/node_modules/
+
+# Vite build output and cache
+frontend-react/dist/
+frontend-react/.vite/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+backend/models/
+models/
