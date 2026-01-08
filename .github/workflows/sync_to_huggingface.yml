@@ -2,9 +2,7 @@ name: Sync to Hugging Face Hub
 
 on:
   push:
-    branches: [main] # Atau 'master' jika branch utamamu master
-
-  # Agar bisa dijalankan manual juga lewat tab Actions
+    branches: [main]
   workflow_dispatch:
 
 jobs:
@@ -20,4 +18,22 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-            git push https://FHQ360:$HF_TOKEN@huggingface.co/spaces/FHQ360/backend-quran-app main --force
+          # 1. Konfigurasi Git Identity (Diperlukan untuk commit penghapusan)
+          git config --global user.email "action@github.com"
+          git config --global user.name "GitHub Action"
+
+          # 2. BERSIH-BERSIH KHUSUS HUGGING FACE
+          # Kita hapus folder frontend karena HF cuma butuh backend.
+          # Dengan dihapus, maka file gambar binary pun ikut hilang -> HF Senang!
+          rm -rf frontend-react
+          
+          # Hapus juga .gitattributes agar tidak ada aturan LFS yang tersisa
+          rm -f .gitattributes
+
+          # 3. Commit perubahan ini (Hanya terjadi di server sementara GitHub, repo aslimu AMAN)
+          git add .
+          git commit -m "Deploy: Backend only (Removed frontend images to satisfy HF)"
+
+          # 4. Push ke Hugging Face
+          # GANTI 'm4ulana' dan 'backend-quran' dengan username/space kamu yang benar!
+          git push https://m4ulana:$HF_TOKEN@huggingface.co/spaces/USERNAME_KAMU/NAMA_SPACE_KAMU main --force
