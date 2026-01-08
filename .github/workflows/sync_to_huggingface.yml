@@ -12,27 +12,33 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          lfs: true
       
-      - name: Push to hub
+      - name: Prepare and Push Clean Backend
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # 1. Konfigurasi Git Identity (Diperlukan untuk commit penghapusan)
+          # 1. Konfigurasi Git Identity
           git config --global user.email "action@github.com"
           git config --global user.name "GitHub Action"
 
-          # 2. BERSIH-BERSIH KHUSUS HUGGING FACE
-          # Kita hapus folder frontend karena HF cuma butuh backend.
-          # Dengan dihapus, maka file gambar binary pun ikut hilang -> HF Senang!
-          rm -rf frontend-react
+          # 2. BUAT FOLDER PENAMPUNGAN BERSIH
+          # Kita bikin folder baru yang benar-benar kosong
+          mkdir deployment_zone
           
-          # Hapus juga .gitattributes agar tidak ada aturan LFS yang tersisa
-          rm -f .gitattributes
-
-          # 3. Commit perubahan ini (Hanya terjadi di server sementara GitHub, repo aslimu AMAN)
+          # 3. COPY HANYA YANG DIBUTUHKAN (Backend Only)
+          # Frontend dan gambarnya TIDAK KITA SENTUH/COPY SAMA SEKALI
+          cp -r backend deployment_zone/
+          cp Dockerfile deployment_zone/
+          cp README.md deployment_zone/
+          
+          # 4. MASUK KE FOLDER BARU & INISIALISASI GIT BARU
+          cd deployment_zone
+          git init
+          git branch -m main
+          
+          # 5. COMMIT (Sejarah dimulai dari sini, jadi masa lalu Frontend HILANG TOTAL)
           git add .
-          git commit -m "Deploy: Backend only (Removed frontend images to satisfy HF)"
+          git commit -m "Deploy: Clean Backend Artifact"
 
-          # 4. Push ke Hugging Face
+          # 6. PUSH PAKSA KE HUGGING FACE
           git push https://FHQ360:$HF_TOKEN@huggingface.co/spaces/FHQ360/backend-quran-app main --force
