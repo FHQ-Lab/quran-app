@@ -1064,175 +1064,157 @@ def find_surah_in_query(query: str) -> int | None:
                 
     return None  
 
-async def run_rag_generation(user_message: str, dynamic_context: str, context_source_text: str):
-    """Fungsi helper terpusat untuk memanggil Groq RAG."""
-    
-    # Susun Prompt RAG
-    prompt = f"""
-    Anda adalah asisten AI yang ahli dalam Tafsir Al-Qur'an.
-    Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan konteks tafsir dari {context_source_text} yang saya berikan.
-    Jawab dengan ringkas, jelas, dan dalam bahasa Indonesia.
-    Sebutkan sumber ayat (Contoh: "Berdasarkan tafsir...") jika relevan.
-    Jika pertanyaan pengguna tidak relevan dengan konteks, jawab dengan sopan bahwa Anda tidak menemukan jawabannya di konteks tersebut.
-
-    --- KONTEKS TAFSIR ---
-    {dynamic_context}
-    --- AKHIR KONTEKS ---
+def get_tafsir_on_demand(surah_num, ayah_num):
     """
-    
+    Fungsi Hemat RAM:
+    Hanya membaca file JSON Tafsir dari Disk saat dibutuhkan saja.
+    Tidak disimpan di RAM selamanya.
+    """
     try:
-        print("INFO:    Mengirim prompt RAG ke Groq...")
-        
-        chat_completion = await client.chat.completions.create(
-            messages=[
-                {"role": "system", "content": prompt},
-                {"role": "user", "content": user_message}
-            ],
-            model="llama-3.3-70b-versatile", 
-        )
-        
-        return {"answer_type": "text", "content": chat_completion.choices[0].message.content}
-
+        file_path = os.path.join(TAFSIR_DATA_DIR, f"{surah_num}.json")
+        if not os.path.exists(file_path):
+            return "Tafsir tidak tersedia."
+            
+        with open(file_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            # Format data tafsir biasanya: { "1": "Teks...", "2": "Teks..." }
+            # Kita cari berdasarkan nomor ayat (string)
+            return data.get(str(ayah_num), {}).get("text", "Tafsir tidak ditemukan.")
     except Exception as e:
-        print(f"Error Groq API atau RAG: {e}")
-        if "413" in str(e):
-             raise HTTPException(status_code=500, detail="Permintaan Anda terlalu besar (melebihi batas token). Coba ajukan pertanyaan yang lebih spesifik.")
-        raise HTTPException(status_code=500, detail=f"Terjadi kesalahan saat menghubungi model AI: {e}")
+        print(f"Error baca tafsir disk: {e}")
+        return "Gagal mengambil tafsir."
 
-#
+# async def run_rag_generation(user_message: str, dynamic_context: str, context_source_text: str):
+#     """Fungsi helper terpusat untuk memanggil Groq RAG."""
+    
+#     # Susun Prompt RAG
+#     prompt = f"""
+#     Anda adalah asisten AI yang ahli dalam Tafsir Al-Qur'an.
+#     Tugas Anda adalah menjawab pertanyaan pengguna HANYA berdasarkan konteks tafsir dari {context_source_text} yang saya berikan.
+#     Jawab dengan ringkas, jelas, dan dalam bahasa Indonesia.
+#     Sebutkan sumber ayat (Contoh: "Berdasarkan tafsir...") jika relevan.
+#     Jika pertanyaan pengguna tidak relevan dengan konteks, jawab dengan sopan bahwa Anda tidak menemukan jawabannya di konteks tersebut.
+
+#     --- KONTEKS TAFSIR ---
+#     {dynamic_context}
+#     --- AKHIR KONTEKS ---
+#     """
+    
+#     try:
+#         print("INFO:    Mengirim prompt RAG ke Groq...")
+        
+#         chat_completion = await client.chat.completions.create(
+#             messages=[
+#                 {"role": "system", "content": prompt},
+#                 {"role": "user", "content": user_message}
+#             ],
+#             model="llama-3.3-70b-versatile", 
+#         )
+        
+#         return {"answer_type": "text", "content": chat_completion.choices[0].message.content}
+
+#     except Exception as e:
+#         print(f"Error Groq API atau RAG: {e}")
+#         if "413" in str(e):
+#              raise HTTPException(status_code=500, detail="Permintaan Anda terlalu besar (melebihi batas token). Coba ajukan pertanyaan yang lebih spesifik.")
+#         raise HTTPException(status_code=500, detail=f"Terjadi kesalahan saat menghubungi model AI: {e}")
+
+
+async def ask_groq_ai(user_query, context_text):
+    """
+    Mengirim prompt ke Groq (Llama 3)
+    """
+    system_prompt = """
+    Kamu adalah Asisten Islami yang cerdas, ramah, dan moderat (Wasathiyah).
+    Tugasmu adalah menjawab pertanyaan user BERDASARKAN data ayat/tafsir yang diberikan di context.
+    
+    Aturan:
+    1. Jawab dengan Bahasa Indonesia yang luwes dan sopan.
+    2. JANGAN mengarang ayat atau hukum sendiri. Gunakan hanya data yang diberikan.
+    3. Jika data context tidak relevan dengan pertanyaan, katakan jujur: "Maaf, saya tidak menemukan ayat yang spesifik membahas hal itu dalam database saya, tapi secara umum..."
+    4. Sertakan referensi (Nama Surah:Ayat) dalam jawabanmu.
+    """
+
+    user_prompt = f"""
+    Pertanyaan User: "{user_query}"
+    
+    Data Referensi (Al-Qur'an & Tafsir):
+    {context_text}
+    
+    Tolong jelaskan jawaban untuk pertanyaan user tersebut berdasarkan referensi di atas.
+    """
+
+    try:
+        chat_completion = client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            model="llama-3.3-70b-versatile", # Model Llama 3.3 (Cerdas & Cepat)
+            temperature=0.6,
+            max_tokens=1024,
+        )
+        return chat_completion.choices[0].message.content
+    except Exception as e:
+        print(f"Groq API Error: {e}")
+        return "Mohon maaf, otak AI saya sedang gangguan koneksi. Coba lagi nanti ya."
 
 
 # === ENDPOINT CHATBOT (FINAL DENGAN LOGIKA 5 KASUS) ===
 @app.post("/chatbot")
 async def handle_chatbot_message(request: VoiceSearchRequest):
-    user_message = request.text.lower()
+    user_message = request.text.lower().strip()
+    print(f"🤖 Chatbot Query: {user_message}")
+
+    # --- 1. DETEKSI OBROLAN RINGAN (Small Talk) ---
+    # Agar hemat kuota Groq, pertanyaan simple dijawab langsung
+    greetings = ["halo", "hai", "assalamualaikum", "tes", "pagi", "siang"]
+    if user_message in greetings:
+         return {"answer_type": "text", "content": "Wa'alaikumussalam! Saya adalah asisten Al-Qur'an. Silakan tanya tentang hukum, kisah, atau tafsir ayat tertentu."}
+
+    # --- 2. STRATEGI RAG (Retrieval) ---
+    context_data = ""
     
-    # Cek apakah ada kunci mapping yang MUNCUL di dalam pesan user
-    target_special = None
+    # Cek apakah user menyebutkan nomor surat spesifik? (Misal: "tafsir al baqarah 255")
+    # Kita gunakan logika regex sederhana atau manfaatkan helper yang sudah ada
+    # (Di sini kita pakai pendekatan Search Global biar lebih fleksibel)
     
-    # Normalisasi pesan user (hapus spasi ganda)
-    norm_msg = " " + user_message.strip() + " " # Tambah spasi biar boundary jelas
+    # Lakukan pencarian ayat yang relevan menggunakan mesin pencari kita yang lama
+    # Kita cari 3-5 ayat teratas yang paling relevan dengan pertanyaan user
+    search_results = search_global(user_message) 
     
-    for key, val in SPECIAL_AYAH_MAPPING.items():
-        # Jika key ada di dalam pesan (misal: "مجريها" ada di "بسم الله مجريها")
-        # ATAU jika key latin (misal "majreha") ada di pesan
-        if key in norm_msg or key in re.sub(r'[^a-z]', '', user_message): 
-            target_special = val
-            break
-            
-    if target_special:
-        spec_surah, spec_ayah = target_special
-        print(f"INFO: Chatbot (Special Gharib/Muqatta'at) terdeteksi: {spec_surah}:{spec_ayah}")
-        try:
-            return get_spesific_ayah(spec_surah, spec_ayah)
-        except Exception as e:
-            pass
+    # Jika search_results kosong, AI mungkin akan bingung, tapi biarkan dia menjawab secara umum
+    if not search_results:
+         return {"answer_type": "text", "content": "Maaf, saya belum menemukan ayat yang pas dengan kata kunci tersebut. Coba gunakan kata kunci lain."}
+
+    # Ambil 3 hasil teratas saja (biar context tidak kepenuhan)
+    top_results = search_results[:3]
     
-    # --- 1. DETEKSI NIAT ---
-    rag_keywords = ["hubungan", "jelaskan", "apa", "kenapa", "mengapa", "ringkasan", "rangkuman", "tentang", "bagaimana", "pelajaran"]
-    is_rag_question = any(word in user_message for word in rag_keywords) or re.search(r'\d+-\d+', user_message)
-    ayat_list = extract_ayat_numbers(user_message)
-    surah_found = find_surah_in_query(user_message)
-
-    # --- 2. PENENTUAN KEPUTUSAN ---
-
-    # KASUS 1: Permintaan ayat sederhana (Contoh: "tafsir 5", "tunjukkan 11")
-    # -> ADA 1 angka, BUKAN RAG, DAN TIDAK sebut surah lain
-    if len(ayat_list) == 1 and not is_rag_question and (surah_found is None or surah_found == 67):
-        try:
-            ayah_number = ayat_list[0]
-            if ayah_number > 30: # Jika "tafsir 35" (di luar Al-Mulk)
-                 raise HTTPException(status_code=404, detail="Maaf, untuk permintaan ayat spesifik (tanpa nama surah), saya hanya bisa mengambil dari Surah Al-Mulk (1-30).")
+    for item in top_results:
+        s_num = item['surah_number']
+        a_num = item['ayah_number']
+        
+        # 1. Ambil Teks Ayat & Terjemahan (Dari RAM)
+        verse_key = f"{s_num}:{a_num}"
+        verse_ram = QURAN_TEXT_MAP.get(verse_key)
+        
+        if verse_ram:
+            # 2. Ambil Tafsir Lengkap (Dari DISK - Lazy Load)
+            # Ini kuncinya! Kita ambil penjelasan panjang biar AI paham konteks mendalam
+            tafsir_long = get_tafsir_on_demand(s_num, a_num)
             
-            print(f"INFO: Chatbot (Kasus 1: Simple Al-Mulk) terdeteksi. Mencari 67:{ayah_number}")
-            return get_spesific_ayah(surah_number=67, ayah_number=ayah_number)
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=f"Error saat mengambil ayat: {e}")
+            # Susun menjadi string context
+            context_data += f"\n=== REFERENSI: QS. {verse_ram['surah_name']} Ayat {a_num} ===\n"
+            context_data += f"Terjemahan: {verse_ram['translation']}\n"
+            context_data += f"Tafsir Ringkas: {verse_ram['tafsir']}\n"
+            context_data += f"Tafsir Lengkap (Tahlili): {tafsir_long[:1500]}...\n" # Potong jika terlalu panjang biar token muat
+            context_data += "--------------------------------------------------\n"
 
-    # KASUS 2: Pertanyaan RAG spesifik Al-Mulk (Contoh: "hubungan 1-5")
-    # -> ADA angka, INI RAG, DAN (tidak sebut surah ATAU sebut Al-Mulk)
-    elif len(ayat_list) > 0 and is_rag_question and (surah_found is None or surah_found == 67):
-        print(f"INFO: Chatbot (Kasus 2: Al-Mulk RAG) terdeteksi untuk ayat: {ayat_list}")
-        dynamic_context = ""
-        valid_ayat_list = [num for num in ayat_list if num <= 30] # Filter hanya 1-30
-        if not valid_ayat_list:
-             raise HTTPException(status_code=404, detail="Angka yang Anda sebutkan di luar jangkauan Surah Al-Mulk (1-30).")
-
-        for num in valid_ayat_list:
-            verse_data = QURAN_TEXT_MAP.get(f"67:{num}")
-            if verse_data:
-                dynamic_context += f"Tafsir Ayat {num}: {verse_data['tafsir']}\n"
-        
-        context_source_text = f"Tafsir Al-Mulk ayat {', '.join(map(str, valid_ayat_list))}"
-        
-        return await run_rag_generation(user_message, dynamic_context, context_source_text)
-
-    # KASUS 3: Pertanyaan RAG Global (TAPI SPESIFIK SURAH)
-    # (Contoh: "rangkuman ar-rahman", "pelajaran al-baqarah 1-5")
-    elif is_rag_question and surah_found is not None and surah_found != 67:
-        print(f"INFO: Chatbot (Kasus 3: Global Surah RAG) terdeteksi untuk Surah {surah_found}")
-        
-        ayat_to_fetch = ayat_list if ayat_list else range(1, 287) # Ambil semua ayat jika tidak spesifik (misal 286 u/ Baqarah)
-        
-        dynamic_context = ""
-        context_source = []
-        
-        for num in ayat_to_fetch:
-            verse_ref = f"{surah_found}:{num}"
-            verse_data = QURAN_TEXT_MAP.get(verse_ref)
-            if verse_data:
-                # KITA PAKAI TERJEMAHAN, KARENA TAFSIR PASTI MELEDAK
-                dynamic_context += f"Terjemahan Ayat {num}: {verse_data['translation']}\n"
-                context_source.append(str(num))
-        
-        if not dynamic_context:
-             raise HTTPException(status_code=404, detail=f"Saya menemukan Surah {SURAH_NUMBER_TO_NAME[surah_found]}, tapi gagal mengambil konteks ayatnya.")
-
-        context_source_text = f"Terjemahan {SURAH_NUMBER_TO_NAME[surah_found]} ayat {', '.join(context_source)}"
-        return await run_rag_generation(user_message, dynamic_context, context_source_text)
-
-    # KASUS 4: Pertanyaan RAG Umum/Vektor (Contoh: "apa itu sabar?")
-    # -> INI RAG, TAPI TIDAK ADA angka, DAN TIDAK ADA nama surah
-    elif is_rag_question and len(ayat_list) == 0 and surah_found is None:
-        print(f"INFO: Chatbot (Kasus 4: Vector RAG) terdeteksi. Menerima: {user_message}")
-        
-        try:
-            query_vector = RAG_MODEL.encode([user_message], normalize_embeddings=True)
-            k = 5
-            distances, indices = FAISS_INDEX.search(np.array(query_vector).astype('float32'), k)
-            
-            dynamic_context = ""
-            context_source = []
-            for i in indices[0]:
-                verse_ref = VERSE_REFERENCES[i]
-                verse_data = QURAN_TEXT_MAP.get(verse_ref)
-                if verse_data:
-                    surah_name = SURAH_NUMBER_TO_NAME.get(verse_data['surah'], 'Unknown')
-                    context_source.append(f"QS. {surah_name} ({verse_ref})")
-                    # Kita pakai tafsir + terjemahan di sini, karena konteksnya kecil (hanya 5)
-                    dynamic_context += f"Konteks dari {surah_name} ayat {verse_data['ayah']}:\n"
-                    dynamic_context += f"Terjemahan: {verse_data['translation']}\nTafsir: {verse_data['tafsir']}\n---\n"
-            
-            if not dynamic_context:
-                 raise HTTPException(status_code=404, detail="Tidak ditemukan konteks yang relevan untuk pertanyaan Anda.")
-            
-            context_source_text = f"konteks {', '.join(context_source)}"
-            return await run_rag_generation(user_message, dynamic_context, context_source_text)
-
-        except Exception as e:
-            print(f"Error Vector RAG: {e}")
-            raise HTTPException(status_code=500, detail=f"Gagal melakukan pencarian vektor: {e}")
-            
-    # KASUS 5: Obrolan Ringan / Tidak Dikenali
-    # -> BUKAN pertanyaan RAG DAN tidak ada angka
-    else:
-        print(f"INFO: Chatbot (Kasus 5: Small Talk) terdeteksi.")
-        if "halo" in user_message or "hai" in user_message or "salam" in user_message:
-            return {"answer_type": "text", "content": "Halo! Saya adalah asisten AI yang bisa membantu Anda mencari tafsir di seluruh Al-Qur'an. Silakan tanyakan apa saja (misal: 'apa itu sabar?' atau 'rangkuman surah ar-rahman')."}
-        elif "terima kasih" in user_message or "makasih" in user_message:
-            return {"answer_type": "text", "content": "Sama-sama! Senang bisa membantu."}
-        else:
-            return {"answer_type": "text", "content": "Maaf, saya tidak mengerti pertanyaan Anda. Coba tanyakan tentang tema, ayat, atau surah tertentu (misal: 'apa itu sabar?')."}
+    # --- 3. GENERATION (Kirim ke Groq) ---
+    print("Mengirim data ke Groq...")
+    ai_response = await ask_groq_ai(user_message, context_data)
+    
+    return {"answer_type": "text", "content": ai_response}
 
 
 @app.get("/debug-path")
