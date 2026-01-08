@@ -35,5 +35,4 @@ jobs:
           git commit -m "Deploy: Backend only (Removed frontend images to satisfy HF)"
 
           # 4. Push ke Hugging Face
-          # GANTI 'm4ulana' dan 'backend-quran' dengan username/space kamu yang benar!
-          git push https://m4ulana:$HF_TOKEN@huggingface.co/spaces/USERNAME_KAMU/NAMA_SPACE_KAMU main --force
+          git push https://FHQ360:$HF_TOKEN@huggingface.co/spaces/FHQ360/backend-quran-app main --force
