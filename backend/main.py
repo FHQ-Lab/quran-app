@@ -1160,6 +1160,48 @@ async def ask_groq_ai(user_query, context_text):
         return "Mohon maaf, otak AI saya sedang gangguan koneksi. Coba lagi nanti ya."
 
 
+# ==========================================
+# 🔍 HELPER PENCARIAN KHUSUS AI (Internal)
+# ==========================================
+def search_quran_memory(query: str):
+    """
+    Fungsi pencari sederhana khusus untuk Chatbot AI.
+    Hanya mencari teks di RAM (Terjemahan & Latin).
+    Tidak menangani logika HTTP Response yang rumit.
+    """
+    query = query.lower().strip()
+    results = []
+    
+    # Ambang batas kemiripan
+    THRESHOLD = 70 
+    
+    # Loop dictionary QURAN_TEXT_MAP
+    for key, data in QURAN_TEXT_MAP.items():
+        # Gabungkan teks yang mau dicari (Terjemahan)
+        text_to_search = data['translation'].lower()
+        
+        # Logika skor
+        if query in text_to_search:
+            score = 100
+        else:
+            score = fuzz.partial_ratio(query, text_to_search)
+        
+        if score >= THRESHOLD:
+            results.append({
+                "surah_number": data['surah'],
+                "ayah_number": data['ayah'],
+                "surah_name": data['surah_name'],
+                "translation": data['translation'],
+                "tafsir": data['tafsir'], # Kita butuh ini untuk AI
+                "score": score
+            })
+
+    # Urutkan score tertinggi
+    results.sort(key=lambda x: x['score'], reverse=True)
+    
+    return results[:10]
+
+
 # === ENDPOINT CHATBOT (FINAL DENGAN LOGIKA 5 KASUS) ===
 @app.post("/chatbot")
 async def handle_chatbot_message(request: VoiceSearchRequest):
@@ -1181,7 +1223,7 @@ async def handle_chatbot_message(request: VoiceSearchRequest):
     
     # Lakukan pencarian ayat yang relevan menggunakan mesin pencari kita yang lama
     # Kita cari 3-5 ayat teratas yang paling relevan dengan pertanyaan user
-    search_results = search_global(user_message) 
+    search_results = search_quran_memory(user_message)
     
     # Jika search_results kosong, AI mungkin akan bingung, tapi biarkan dia menjawab secara umum
     if not search_results:
