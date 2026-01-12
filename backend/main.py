@@ -210,16 +210,22 @@ try:
     print("INFO:    Memulai Inisialisasi Sistem AI...")
     
     # 1. Setup Client Groq
-    groq_api_key = os.environ.get("GROQ_API_KEY")
+    raw_api_key = os.environ.get("GROQ_API_KEY", "")
+    groq_api_key = raw_api_key.strip() if raw_api_key else None
+
     client = None
 
     if groq_api_key:
         try:
-            client = AsyncGroq(api_key=groq_api_key)
+            # Tambahkan timeout lebih panjang (30 detik) agar tidak gampang putus
+            client = AsyncGroq(
+                api_key=groq_api_key,
+                http_client=httpx.AsyncClient(timeout=30.0) 
+            )
         except Exception as e:
             print(f"⚠️ Warning: Gagal inisialisasi AsyncGroq: {e}")
     else:
-        print("⚠️ Warning: GROQ_API_KEY belum diset.")
+        print("⚠️ Warning: GROQ_API_KEY belum diset atau kosong.")
 
     # 2. Load Model (Pakai fungsi pintar tadi)
     RAG_MODEL = load_embedding_model()
@@ -1121,10 +1127,9 @@ def get_tafsir_on_demand(surah_num, ayah_num):
 #              raise HTTPException(status_code=500, detail="Permintaan Anda terlalu besar (melebihi batas token). Coba ajukan pertanyaan yang lebih spesifik.")
 #         raise HTTPException(status_code=500, detail=f"Terjadi kesalahan saat menghubungi model AI: {e}")
 
-
 async def ask_groq_ai(user_query, context_text):
     if not client:
-        return "Maaf, kunci API Groq belum dipasang di server."
+        return "Maaf, kunci API Groq belum dipasang atau terdeteksi di server."
 
     system_prompt = """
     Kamu adalah Asisten Islami yang cerdas dan moderat.
@@ -1132,16 +1137,11 @@ async def ask_groq_ai(user_query, context_text):
     JANGAN mengarang ayat. Sertakan (QS. NamaSurah:Ayat) di jawabanmu.
     Gunakan format Markdown (Bold, List) agar rapi.
     """
-
-    user_prompt = f"""
-    Pertanyaan User: "{user_query}"
     
-    Data Referensi:
-    {context_text}
-    """
+    user_prompt = f"Pertanyaan: '{user_query}'\n\nData Referensi:\n{context_text}"
 
     try:
-        # PERUBAHAN PENTING DI SINI: pakai 'await'
+        # Panggil dengan await
         chat_completion = await client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_prompt},
@@ -1152,16 +1152,18 @@ async def ask_groq_ai(user_query, context_text):
             max_tokens=1024,
         )
         return chat_completion.choices[0].message.content
+    except httpx.ConnectError:
+         return "Maaf, gagal menghubungi server AI (Connection Error). Coba sesaat lagi."
     except Exception as e:
         print(f"❌ Groq API Error: {e}")
-        return f"Maaf, terjadi gangguan saat menghubungi otak AI. (Error: {str(e)})"
+        return f"Maaf, ada gangguan pada otak AI: {str(e)}"
 
 
 # HELPER PENCARIAN KHUSUS AI (Internal)
 def search_quran_memory(query: str):
     """
     Fungsi pencari sederhana khusus untuk Chatbot AI.
-    Hanya mencari teks di RAM (Terjemahan & Latin).
+    FIX: Mengambil nama surah dari SURAH_NUMBER_TO_NAME agar tidak KeyError.
     """
     query = query.lower().strip()
     results = []
@@ -1176,10 +1178,14 @@ def search_quran_memory(query: str):
             score = fuzz.partial_ratio(query, text_to_search)
         
         if score >= THRESHOLD:
+            # FIX DI SINI: Ambil nama surah dari Dictionary Global
+            s_num = data['surah']
+            s_name = SURAH_NUMBER_TO_NAME.get(s_num, f"Surah {s_num}")
+            
             results.append({
-                "surah_number": data['surah'],
+                "surah_number": s_num,
                 "ayah_number": data['ayah'],
-                "surah_name": data['surah_name'],
+                "surah_name": s_name,     # <-- Sekarang aman!
                 "translation": data['translation'],
                 "tafsir": data['tafsir'], 
                 "score": score
