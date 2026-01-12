@@ -210,25 +210,31 @@ try:
     print("INFO:    Memulai Inisialisasi Sistem AI...")
     
     # 1. Setup Client Groq
-    GROQ_API_KEY = os.environ.get("GROQ_API_KEY")
-    if not GROQ_API_KEY:
-        print("WARNING: GROQ_API_KEY tidak ditemukan di Environment Variables!")
-    client = AsyncGroq(api_key=GROQ_API_KEY)
+    groq_api_key = os.environ.get("GROQ_API_KEY")
+    client = None
+
+    if groq_api_key:
+        try:
+            client = AsyncGroq(api_key=groq_api_key)
+        except Exception as e:
+            print(f"⚠️ Warning: Gagal inisialisasi AsyncGroq: {e}")
+    else:
+        print("⚠️ Warning: GROQ_API_KEY belum diset.")
 
     # 2. Load Model (Pakai fungsi pintar tadi)
     RAG_MODEL = load_embedding_model()
     
     # 3. Load Database FAISS & JSON
     # Cek keberadaan file dulu untuk debugging yang lebih mudah
-    if not os.path.exists(FAISS_INDEX_FILE):
-        raise FileNotFoundError(f"File Index FAISS tidak ditemukan di: {FAISS_INDEX_FILE}")
+    # if not os.path.exists(FAISS_INDEX_FILE):
+    #     raise FileNotFoundError(f"File Index FAISS tidak ditemukan di: {FAISS_INDEX_FILE}")
         
-    print(f"INFO:    Memuat Index FAISS...")
-    FAISS_INDEX = faiss.read_index(FAISS_INDEX_FILE)
+    # print(f"INFO:    Memuat Index FAISS...")
+    # FAISS_INDEX = faiss.read_index(FAISS_INDEX_FILE)
     
-    print(f"INFO:    Memuat Referensi Ayat...")
-    with open(VERSE_REF_FILE, 'r', encoding='utf-8') as f:
-        VERSE_REFERENCES = json.load(f)
+    # print(f"INFO:    Memuat Referensi Ayat...")
+    # with open(VERSE_REF_FILE, 'r', encoding='utf-8') as f:
+    #     VERSE_REFERENCES = json.load(f)
     
 
     
@@ -1074,14 +1080,10 @@ def get_tafsir_on_demand(surah_num, ayah_num):
         file_path = os.path.join(TAFSIR_DATA_DIR, f"{surah_num}.json")
         if not os.path.exists(file_path):
             return "Tafsir tidak tersedia."
-            
         with open(file_path, 'r', encoding='utf-8') as f:
             data = json.load(f)
-            # Format data tafsir biasanya: { "1": "Teks...", "2": "Teks..." }
-            # Kita cari berdasarkan nomor ayat (string)
             return data.get(str(ayah_num), {}).get("text", "Tafsir tidak ditemukan.")
-    except Exception as e:
-        print(f"Error baca tafsir disk: {e}")
+    except Exception:
         return "Gagal mengambil tafsir."
 
 # async def run_rag_generation(user_message: str, dynamic_context: str, context_source_text: str):
@@ -1121,66 +1123,53 @@ def get_tafsir_on_demand(surah_num, ayah_num):
 
 
 async def ask_groq_ai(user_query, context_text):
-    """
-    Mengirim prompt ke Groq (Llama 3)
-    """
+    if not client:
+        return "Maaf, kunci API Groq belum dipasang di server."
+
     system_prompt = """
-    Kamu adalah Asisten Islami yang cerdas, ramah, dan moderat (Wasathiyah).
-    Tugasmu adalah menjawab pertanyaan user BERDASARKAN data ayat/tafsir yang diberikan di context.
-    
-    Aturan:
-    1. Jawab dengan Bahasa Indonesia yang luwes dan sopan.
-    2. JANGAN mengarang ayat atau hukum sendiri. Gunakan hanya data yang diberikan.
-    3. Jika data context tidak relevan dengan pertanyaan, katakan jujur: "Maaf, saya tidak menemukan ayat yang spesifik membahas hal itu dalam database saya, tapi secara umum..."
-    4. Sertakan referensi (Nama Surah:Ayat) dalam jawabanmu.
+    Kamu adalah Asisten Islami yang cerdas dan moderat.
+    Jawab pertanyaan user menggunakan data referensi yang diberikan.
+    JANGAN mengarang ayat. Sertakan (QS. NamaSurah:Ayat) di jawabanmu.
+    Gunakan format Markdown (Bold, List) agar rapi.
     """
 
     user_prompt = f"""
     Pertanyaan User: "{user_query}"
     
-    Data Referensi (Al-Qur'an & Tafsir):
+    Data Referensi:
     {context_text}
-    
-    Tolong jelaskan jawaban untuk pertanyaan user tersebut berdasarkan referensi di atas.
     """
 
     try:
-        chat_completion = client.chat.completions.create(
+        # PERUBAHAN PENTING DI SINI: pakai 'await'
+        chat_completion = await client.chat.completions.create(
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt}
             ],
-            model="llama-3.3-70b-versatile", # Model Llama 3.3 (Cerdas & Cepat)
+            model="llama-3.3-70b-versatile",
             temperature=0.6,
             max_tokens=1024,
         )
         return chat_completion.choices[0].message.content
     except Exception as e:
-        print(f"Groq API Error: {e}")
-        return "Mohon maaf, otak AI saya sedang gangguan koneksi. Coba lagi nanti ya."
+        print(f"❌ Groq API Error: {e}")
+        return f"Maaf, terjadi gangguan saat menghubungi otak AI. (Error: {str(e)})"
 
 
-# ==========================================
-# 🔍 HELPER PENCARIAN KHUSUS AI (Internal)
-# ==========================================
+# HELPER PENCARIAN KHUSUS AI (Internal)
 def search_quran_memory(query: str):
     """
     Fungsi pencari sederhana khusus untuk Chatbot AI.
     Hanya mencari teks di RAM (Terjemahan & Latin).
-    Tidak menangani logika HTTP Response yang rumit.
     """
     query = query.lower().strip()
     results = []
+    THRESHOLD = 60 
     
-    # Ambang batas kemiripan
-    THRESHOLD = 70 
-    
-    # Loop dictionary QURAN_TEXT_MAP
     for key, data in QURAN_TEXT_MAP.items():
-        # Gabungkan teks yang mau dicari (Terjemahan)
         text_to_search = data['translation'].lower()
         
-        # Logika skor
         if query in text_to_search:
             score = 100
         else:
@@ -1192,71 +1181,73 @@ def search_quran_memory(query: str):
                 "ayah_number": data['ayah'],
                 "surah_name": data['surah_name'],
                 "translation": data['translation'],
-                "tafsir": data['tafsir'], # Kita butuh ini untuk AI
+                "tafsir": data['tafsir'], 
                 "score": score
             })
 
-    # Urutkan score tertinggi
     results.sort(key=lambda x: x['score'], reverse=True)
-    
-    return results[:10]
+    return results[:5]
 
 
 # === ENDPOINT CHATBOT (FINAL DENGAN LOGIKA 5 KASUS) ===
 @app.post("/chatbot")
 async def handle_chatbot_message(request: VoiceSearchRequest):
-    user_message = request.text.lower().strip()
-    print(f"🤖 Chatbot Query: {user_message}")
+    try:
+        user_message = request.text.lower().strip()
+        print(f"🤖 Chatbot Query: {user_message}")
 
-    # --- 1. DETEKSI OBROLAN RINGAN (Small Talk) ---
-    # Agar hemat kuota Groq, pertanyaan simple dijawab langsung
-    greetings = ["halo", "hai", "assalamualaikum", "tes", "pagi", "siang"]
-    if user_message in greetings:
-         return {"answer_type": "text", "content": "Wa'alaikumussalam! Saya adalah asisten Al-Qur'an. Silakan tanya tentang hukum, kisah, atau tafsir ayat tertentu."}
-
-    # --- 2. STRATEGI RAG (Retrieval) ---
-    context_data = ""
-    
-    # Cek apakah user menyebutkan nomor surat spesifik? (Misal: "tafsir al baqarah 255")
-    # Kita gunakan logika regex sederhana atau manfaatkan helper yang sudah ada
-    # (Di sini kita pakai pendekatan Search Global biar lebih fleksibel)
-    
-    # Lakukan pencarian ayat yang relevan menggunakan mesin pencari kita yang lama
-    # Kita cari 3-5 ayat teratas yang paling relevan dengan pertanyaan user
-    search_results = search_quran_memory(user_message)
-    
-    # Jika search_results kosong, AI mungkin akan bingung, tapi biarkan dia menjawab secara umum
-    if not search_results:
-         return {"answer_type": "text", "content": "Maaf, saya belum menemukan ayat yang pas dengan kata kunci tersebut. Coba gunakan kata kunci lain."}
-
-    # Ambil 3 hasil teratas saja (biar context tidak kepenuhan)
-    top_results = search_results[:3]
-    
-    for item in top_results:
-        s_num = item['surah_number']
-        a_num = item['ayah_number']
+        # --- 1. DETEKSI "SURAT X AYAT Y" ---
+        nums = re.findall(r'\d+', user_message)
+        explicit_context = []
         
-        # 1. Ambil Teks Ayat & Terjemahan (Dari RAM)
-        verse_key = f"{s_num}:{a_num}"
-        verse_ram = QURAN_TEXT_MAP.get(verse_key)
-        
-        if verse_ram:
-            # 2. Ambil Tafsir Lengkap (Dari DISK - Lazy Load)
-            # Ini kuncinya! Kita ambil penjelasan panjang biar AI paham konteks mendalam
-            tafsir_long = get_tafsir_on_demand(s_num, a_num)
+        if len(nums) >= 2:
+            possible_s = int(nums[0])
+            possible_a = int(nums[1])
+            if 1 <= possible_s <= 114:
+                key = f"{possible_s}:{possible_a}"
+                if key in QURAN_TEXT_MAP:
+                    explicit_context.append(QURAN_TEXT_MAP[key])
             
-            # Susun menjadi string context
-            context_data += f"\n=== REFERENSI: QS. {verse_ram['surah_name']} Ayat {a_num} ===\n"
-            context_data += f"Terjemahan: {verse_ram['translation']}\n"
-            context_data += f"Tafsir Ringkas: {verse_ram['tafsir']}\n"
-            context_data += f"Tafsir Lengkap (Tahlili): {tafsir_long[:1500]}...\n" # Potong jika terlalu panjang biar token muat
-            context_data += "--------------------------------------------------\n"
+            if not explicit_context and 1 <= int(nums[-1]) <= 114:
+                 possible_s = int(nums[-1])
+                 possible_a = int(nums[0])
+                 key = f"{possible_s}:{possible_a}"
+                 if key in QURAN_TEXT_MAP:
+                    explicit_context.append(QURAN_TEXT_MAP[key])
 
-    # --- 3. GENERATION (Kirim ke Groq) ---
-    print("Mengirim data ke Groq...")
-    ai_response = await ask_groq_ai(user_message, context_data)
-    
-    return {"answer_type": "text", "content": ai_response}
+        # --- 2. SIAPKAN CONTEXT ---
+        context_data = ""
+        target_verses = []
+
+        if explicit_context:
+            target_verses = explicit_context
+        else:
+            # Panggil Helper Memory (Sync function dipanggil biasa)
+            target_verses = search_quran_memory(user_message)
+
+        if not target_verses and not explicit_context:
+            context_data = "PERINGATAN: Tidak ditemukan ayat yang relevan di database lokal. Jawab berdasarkan pengetahuan umum Islam, tapi beri disclaimer."
+        else:
+            for item in target_verses[:3]: 
+                s_num = item.get('surah_number') or item.get('surah')
+                a_num = item.get('ayah_number') or item.get('ayah')
+                
+                tafsir_long = get_tafsir_on_demand(s_num, a_num)
+                
+                context_data += f"\n=== REFERENSI: QS. {item.get('surah_name')} Ayat {a_num} ===\n"
+                context_data += f"Terjemahan: {item.get('translation')}\n"
+                context_data += f"Tafsir Lengkap: {tafsir_long[:1000]}...\n"
+                context_data += "--------------------------------------------------\n"
+
+        # --- 3. KIRIM KE GROQ (ASYNC) ---
+        # Karena ask_groq_ai sekarang async, kita wajib pakai await
+        ai_response = await ask_groq_ai(user_message, context_data)
+        
+        return {"answer_type": "text", "content": ai_response}
+
+    except Exception as e:
+        print(f"🔥 CRITICAL ERROR di /chatbot: {e}")
+        return {"answer_type": "text", "content": f"Maaf, server mengalami kendala internal: {str(e)}"}
 
 
 @app.get("/debug-path")
