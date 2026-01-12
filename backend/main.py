@@ -210,22 +210,16 @@ try:
     print("INFO:    Memulai Inisialisasi Sistem AI...")
     
     # 1. Setup Client Groq
-    raw_api_key = os.environ.get("GROQ_API_KEY", "")
-    groq_api_key = raw_api_key.strip() if raw_api_key else None
-
+    groq_api_key = os.environ.get("GROQ_API_KEY")
     client = None
 
     if groq_api_key:
         try:
-            # Tambahkan timeout lebih panjang (30 detik) agar tidak gampang putus
-            client = AsyncGroq(
-                api_key=groq_api_key,
-                http_client=httpx.AsyncClient(timeout=30.0) 
-            )
+            client = AsyncGroq(api_key=groq_api_key)
         except Exception as e:
             print(f"⚠️ Warning: Gagal inisialisasi AsyncGroq: {e}")
     else:
-        print("⚠️ Warning: GROQ_API_KEY belum diset atau kosong.")
+        print("⚠️ Warning: GROQ_API_KEY belum diset.")
 
     # 2. Load Model (Pakai fungsi pintar tadi)
     RAG_MODEL = load_embedding_model()
