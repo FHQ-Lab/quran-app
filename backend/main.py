@@ -1157,49 +1157,76 @@ async def ask_groq_ai(user_query, context_text):
 # HELPER PENCARIAN KHUSUS AI (Internal)
 def search_quran_memory(query: str):
     """
-    Fungsi pencari yang di-upgrade (FIXED KeyError surah_name).
+    Fungsi pencari V4:
+    Menggunakan logika 'Keyword Priority' untuk mengatasi masalah Fuzzy.
+    Kata sambung (stopwords) akan diabaikan agar fokus ke inti pertanyaan.
     """
-    query = query.lower().strip()
+    query_raw = query.lower().strip()
+    
+    # 1. Daftar kata yang TIDAK PENTING (Stopwords)
+    stopwords = ["apa", "itu", "maksud", "jelaskan", "bagaimana", "kenapa", "mengapa", 
+                 "siapa", "dimana", "kapan", "tentang", "hukum", "dalil", "ayat", "surat"]
+    
+    # 2. Ambil kata kunci inti saja (Misal: "Apa maksud riba" -> ["riba"])
+    keywords = [w for w in query_raw.split() if w not in stopwords and len(w) > 2]
+    
+    # Jika setelah difilter habis (misal user cuma ketik "apa itu?"), pakai query asli
+    if not keywords:
+        keywords = [query_raw]
+
     results = []
-    THRESHOLD = 50 
+    THRESHOLD = 40 # Kita turunkan lagi, biar keyword match yang nendang skornya naik
     
     for key, data in QURAN_TEXT_MAP.items():
-        # Gabungkan semua teks relevan
+        # Gabungkan Terjemahan + Tafsir
         content_to_search = f"{data['translation']} {data['tafsir']}".lower()
-        score = 0
         
-        # Ambil Nomor Surah
+        score = 0
+        matches_keyword = False
+        
+        # --- A. LOGIKA KEYWORD (PRIORITAS UTAMA) ---
+        # Cek apakah kata kunci inti ("riba") ada di dalam ayat?
+        hit_count = 0
+        for k in keywords:
+            if k in content_to_search:
+                hit_count += 1
+        
+        if hit_count > 0:
+            # Jika ketemu keyword, kasih skor TINGGI (80 + bonus)
+            score = 80 + (hit_count * 10)
+            matches_keyword = True
+            
+        # --- B. LOGIKA FUZZY (CADANGAN) ---
+        # Hanya jalan kalau keyword tidak ketemu, atau sebagai penambah nuansa
+        if not matches_keyword:
+             score = fuzz.partial_ratio(query_raw, content_to_search)
+
+        # Boost Nama Surah (opsional, untuk kasus "Jelaskan Yasin")
         s_num = data['surah']
-        # Ambil Nama Surah dari GLOBAL DICTIONARY (Bukan dari data local yang bikin error)
         s_name = SURAH_NUMBER_TO_NAME.get(s_num, "").lower()
+        if s_name in query_raw:
+             score += 50 # Boost besar kalau sebut nama surah
 
-        # 1. Exact Match
-        if query in content_to_search:
-            score = 100
-        else:
-            # 2. Fuzzy Match
-            score = fuzz.partial_ratio(query, content_to_search)
-            
-        # 3. Boost Score jika query mengandung Nama Surah
-        # Kita pakai variabel s_name yang aman tadi
-        if s_name and s_name in query:
-            score += 30 
-            
+        # --- C. FILTER HASIL ---
         if score >= THRESHOLD:
-            # Kita kirim balik s_name yang sudah kita ambil tadi
-            # Capitalize huruf pertama biar rapi (misal: "al fatihah" -> "Al fatihah")
             display_name = SURAH_NUMBER_TO_NAME.get(s_num, f"Surah {s_num}")
-
+            
             results.append({
                 "surah_number": s_num,
                 "ayah_number": data['ayah'],
-                "surah_name": display_name, # Key ini aman dikirim ke frontend/chatbot
+                "surah_name": display_name,
                 "translation": data['translation'],
                 "tafsir": data['tafsir'], 
                 "score": score
             })
 
+    # Urutkan score tertinggi
     results.sort(key=lambda x: x['score'], reverse=True)
+    
+    # Debug print (biar kamu bisa lihat di log apa yang ditemukan)
+    if results:
+        print(f"DEBUG SEARCH: Keyword={keywords}, Top Result={results[0]['surah_name']} Ayat {results[0]['ayah_number']} (Score: {results[0]['score']})")
+
     return results[:8]
 
 # Helper untuk mencari Nomor Surah dari Nama (Misal: "Al Fatihah" -> 1)
