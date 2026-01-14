@@ -1157,53 +1157,49 @@ async def ask_groq_ai(user_query, context_text):
 # HELPER PENCARIAN KHUSUS AI (Internal)
 def search_quran_memory(query: str):
     """
-    Fungsi pencari yang di-upgrade:
-    1. Mencari di Terjemahan.
-    2. Mencari di Tafsir (PENTING untuk pertanyaan topik seperti 'Riba').
-    3. Mencari di Nama Surah.
+    Fungsi pencari yang di-upgrade (FIXED KeyError surah_name).
     """
     query = query.lower().strip()
     results = []
-    
-    # Threshold kita turunkan biar topik 'samar' tetap ketemu
     THRESHOLD = 50 
     
     for key, data in QURAN_TEXT_MAP.items():
-        # Gabungkan semua teks relevan untuk dicari
-        # Kita cari di Terjemahan DAN Tafsir Pendek
+        # Gabungkan semua teks relevan
         content_to_search = f"{data['translation']} {data['tafsir']}".lower()
-        
         score = 0
         
-        # 1. Exact Match (Prioritas Tertinggi)
+        # Ambil Nomor Surah
+        s_num = data['surah']
+        # Ambil Nama Surah dari GLOBAL DICTIONARY (Bukan dari data local yang bikin error)
+        s_name = SURAH_NUMBER_TO_NAME.get(s_num, "").lower()
+
+        # 1. Exact Match
         if query in content_to_search:
             score = 100
         else:
-            # 2. Fuzzy Match pada Konten
+            # 2. Fuzzy Match
             score = fuzz.partial_ratio(query, content_to_search)
             
-        # 3. Boost Score jika query mengandung Nama Surah (Misal: "Yasin")
-        if data['surah_name'].lower() in query:
-            score += 30 # Bonus poin
+        # 3. Boost Score jika query mengandung Nama Surah
+        # Kita pakai variabel s_name yang aman tadi
+        if s_name and s_name in query:
+            score += 30 
             
         if score >= THRESHOLD:
-            # Ambil nama surah yang benar
-            s_num = data['surah']
-            s_name = SURAH_NUMBER_TO_NAME.get(s_num, f"Surah {s_num}")
-            
+            # Kita kirim balik s_name yang sudah kita ambil tadi
+            # Capitalize huruf pertama biar rapi (misal: "al fatihah" -> "Al fatihah")
+            display_name = SURAH_NUMBER_TO_NAME.get(s_num, f"Surah {s_num}")
+
             results.append({
                 "surah_number": s_num,
                 "ayah_number": data['ayah'],
-                "surah_name": s_name,
+                "surah_name": display_name, # Key ini aman dikirim ke frontend/chatbot
                 "translation": data['translation'],
                 "tafsir": data['tafsir'], 
                 "score": score
             })
 
-    # Urutkan score tertinggi
     results.sort(key=lambda x: x['score'], reverse=True)
-    
-    # Ambil lebih banyak konteks (8 ayat) biar AI lebih pintar
     return results[:8]
 
 # Helper untuk mencari Nomor Surah dari Nama (Misal: "Al Fatihah" -> 1)
@@ -1289,22 +1285,23 @@ async def handle_chatbot_message(request: VoiceSearchRequest):
 
         # --- PENYUSUNAN KONTEKS ---
         if not target_verses:
-             # Fallback context agar AI tidak diam saja
              context_data = "INFO SYSTEM: Tidak ditemukan ayat spesifik di database. Jawablah secara umum berdasarkan ilmu Islam."
         else:
             for item in target_verses:
+                # Ambil nomor surah/ayah dengan cara aman (support logic 1, 2, & 3)
                 s_num = item.get('surah_number') or item.get('surah')
                 a_num = item.get('ayah_number') or item.get('ayah')
-                # Fix nama surah
-                s_name = SURAH_NUMBER_TO_NAME.get(s_num, f"Surah {s_num}")
                 
-                # Ambil tafsir (Lazy Load)
+                # RE-GENERATE Nama Surah dari Kamus Global (Biar konsisten & anti-error)
+                # Jangan percaya key 'surah_name' dari item, karena Logic 1 & 2 mungkin gak punya.
+                s_name_str = SURAH_NUMBER_TO_NAME.get(s_num, f"Surah {s_num}")
+                
                 tafsir_long = get_tafsir_on_demand(s_num, a_num)
                 
-                context_data += f"\n=== REFERENSI: QS. {s_name} Ayat {a_num} ===\n"
+                # Gunakan variabel s_name_str yang barusan kita buat
+                context_data += f"\n=== REFERENSI: QS. {s_name_str} Ayat {a_num} ===\n"
                 context_data += f"Terjemahan: {item.get('translation')}\n"
                 context_data += f"Tafsir Ringkas: {item.get('tafsir')}\n"
-                # Kita potong tafsir panjang biar tidak token limit, tapi cukup panjang buat Riba
                 context_data += f"Tafsir Lengkap: {tafsir_long[:800]}...\n" 
                 context_data += "--------------------------------------------------\n"
 
