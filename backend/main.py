@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware #Untuk menghubungkan ke frontend
+import httpx
 import requests
 import pyarabic.araby as araby # Import library yang baru diinstall
 from pydantic import BaseModel # Untuk mendefinisikan body request
@@ -1156,37 +1157,80 @@ async def ask_groq_ai(user_query, context_text):
 # HELPER PENCARIAN KHUSUS AI (Internal)
 def search_quran_memory(query: str):
     """
-    Fungsi pencari sederhana khusus untuk Chatbot AI.
-    FIX: Mengambil nama surah dari SURAH_NUMBER_TO_NAME agar tidak KeyError.
+    Fungsi pencari yang di-upgrade:
+    1. Mencari di Terjemahan.
+    2. Mencari di Tafsir (PENTING untuk pertanyaan topik seperti 'Riba').
+    3. Mencari di Nama Surah.
     """
     query = query.lower().strip()
     results = []
-    THRESHOLD = 60 
+    
+    # Threshold kita turunkan biar topik 'samar' tetap ketemu
+    THRESHOLD = 50 
     
     for key, data in QURAN_TEXT_MAP.items():
-        text_to_search = data['translation'].lower()
+        # Gabungkan semua teks relevan untuk dicari
+        # Kita cari di Terjemahan DAN Tafsir Pendek
+        content_to_search = f"{data['translation']} {data['tafsir']}".lower()
         
-        if query in text_to_search:
+        score = 0
+        
+        # 1. Exact Match (Prioritas Tertinggi)
+        if query in content_to_search:
             score = 100
         else:
-            score = fuzz.partial_ratio(query, text_to_search)
-        
+            # 2. Fuzzy Match pada Konten
+            score = fuzz.partial_ratio(query, content_to_search)
+            
+        # 3. Boost Score jika query mengandung Nama Surah (Misal: "Yasin")
+        if data['surah_name'].lower() in query:
+            score += 30 # Bonus poin
+            
         if score >= THRESHOLD:
-            # FIX DI SINI: Ambil nama surah dari Dictionary Global
+            # Ambil nama surah yang benar
             s_num = data['surah']
             s_name = SURAH_NUMBER_TO_NAME.get(s_num, f"Surah {s_num}")
             
             results.append({
                 "surah_number": s_num,
                 "ayah_number": data['ayah'],
-                "surah_name": s_name,     # <-- Sekarang aman!
+                "surah_name": s_name,
                 "translation": data['translation'],
                 "tafsir": data['tafsir'], 
                 "score": score
             })
 
+    # Urutkan score tertinggi
     results.sort(key=lambda x: x['score'], reverse=True)
-    return results[:5]
+    
+    # Ambil lebih banyak konteks (8 ayat) biar AI lebih pintar
+    return results[:8]
+
+# Helper untuk mencari Nomor Surah dari Nama (Misal: "Al Fatihah" -> 1)
+def detect_surah_intent(text: str):
+    text = text.lower()
+    # Hapus kata pengganggu
+    clean_text = re.sub(r'surat|surah|qs', '', text).strip()
+    
+    # Cek apakah angka ("1")
+    if clean_text.isdigit():
+        val = int(clean_text)
+        if 1 <= val <= 114:
+            return val
+            
+    # Cek apakah nama ("al fatihah", "yasin", "ar rahman")
+    # Kita loop kamus SURAH_NUMBER_TO_NAME
+    best_match = None
+    highest_ratio = 0
+    
+    for num, name in SURAH_NUMBER_TO_NAME.items():
+        # Cek kemiripan nama
+        ratio = fuzz.ratio(clean_text, name.lower())
+        if ratio > 80 and ratio > highest_ratio: # Harus mirip banget (>80%)
+            highest_ratio = ratio
+            best_match = num
+            
+    return best_match
 
 
 # === ENDPOINT CHATBOT (FINAL DENGAN LOGIKA 5 KASUS) ===
@@ -1196,58 +1240,101 @@ async def handle_chatbot_message(request: VoiceSearchRequest):
         user_message = request.text.lower().strip()
         print(f"🤖 Chatbot Query: {user_message}")
 
-        # --- 1. DETEKSI "SURAT X AYAT Y" ---
-        nums = re.findall(r'\d+', user_message)
-        explicit_context = []
+        context_data = ""
+        target_verses = []
+        intent_type = "general"
+
+        # --- LOGIKA 1: APAKAH USER MENYEBUT "SURAT X"? (Tanpa Ayat) ---
+        # Contoh: "Surat 1", "Jelaskan Al Fatihah", "Kandungan Al Ikhlas"
+        detected_surah_id = detect_surah_intent(user_message)
         
-        if len(nums) >= 2:
+        # Cek apakah user juga menyebut ayat (angka kedua)?
+        nums = re.findall(r'\d+', user_message)
+        has_specific_ayah = len(nums) >= 2 
+
+        if detected_surah_id and not has_specific_ayah:
+            print(f"DEBUG: Terdeteksi Intent Surah Utuh -> Surah {detected_surah_id}")
+            intent_type = "surah_overview"
+            
+            # AMBIL 5 AYAT PERTAMA DARI SURAH TERSEBUT
+            # Ini kuncinya! Kita paksa ambil ayat 1-5 biar AI punya bahan bacaan
+            for i in range(1, 6): # Ambil ayat 1 sampai 5
+                key = f"{detected_surah_id}:{i}"
+                if key in QURAN_TEXT_MAP:
+                    target_verses.append(QURAN_TEXT_MAP[key])
+        
+        # --- LOGIKA 2: APAKAH USER MENYEBUT "SURAT X AYAT Y"? ---
+        # Contoh: "Surat 2 ayat 255"
+        elif len(nums) >= 2:
+            print(f"DEBUG: Terdeteksi Intent Ayat Spesifik")
+            intent_type = "specific_ayah"
+            # (Logika Regex lama kita pakai di sini)
             possible_s = int(nums[0])
             possible_a = int(nums[1])
             if 1 <= possible_s <= 114:
                 key = f"{possible_s}:{possible_a}"
-                if key in QURAN_TEXT_MAP:
-                    explicit_context.append(QURAN_TEXT_MAP[key])
+                if key in QURAN_TEXT_MAP: target_verses.append(QURAN_TEXT_MAP[key])
             
-            if not explicit_context and 1 <= int(nums[-1]) <= 114:
-                 possible_s = int(nums[-1])
-                 possible_a = int(nums[0])
-                 key = f"{possible_s}:{possible_a}"
-                 if key in QURAN_TEXT_MAP:
-                    explicit_context.append(QURAN_TEXT_MAP[key])
+            # Cek kebalikan
+            if not target_verses and 1 <= int(nums[-1]) <= 114:
+                 key = f"{int(nums[-1])}:{int(nums[0])}"
+                 if key in QURAN_TEXT_MAP: target_verses.append(QURAN_TEXT_MAP[key])
 
-        # --- 2. SIAPKAN CONTEXT ---
-        context_data = ""
-        target_verses = []
-
-        if explicit_context:
-            target_verses = explicit_context
+        # --- LOGIKA 3: PENCARIAN TOPIK (FUZZY) ---
+        # Contoh: "Hukum Riba", "Sabar", "Puasa"
         else:
-            # Panggil Helper Memory (Sync function dipanggil biasa)
+            print(f"DEBUG: Terdeteksi Intent Topik Umum (Fuzzy)")
+            intent_type = "topic_search"
             target_verses = search_quran_memory(user_message)
 
-        if not target_verses and not explicit_context:
-            context_data = "PERINGATAN: Tidak ditemukan ayat yang relevan di database lokal. Jawab berdasarkan pengetahuan umum Islam, tapi beri disclaimer."
+        # --- PENYUSUNAN KONTEKS ---
+        if not target_verses:
+             # Fallback context agar AI tidak diam saja
+             context_data = "INFO SYSTEM: Tidak ditemukan ayat spesifik di database. Jawablah secara umum berdasarkan ilmu Islam."
         else:
-            for item in target_verses[:3]: 
+            for item in target_verses:
                 s_num = item.get('surah_number') or item.get('surah')
                 a_num = item.get('ayah_number') or item.get('ayah')
+                # Fix nama surah
+                s_name = SURAH_NUMBER_TO_NAME.get(s_num, f"Surah {s_num}")
                 
+                # Ambil tafsir (Lazy Load)
                 tafsir_long = get_tafsir_on_demand(s_num, a_num)
                 
-                context_data += f"\n=== REFERENSI: QS. {item.get('surah_name')} Ayat {a_num} ===\n"
+                context_data += f"\n=== REFERENSI: QS. {s_name} Ayat {a_num} ===\n"
                 context_data += f"Terjemahan: {item.get('translation')}\n"
-                context_data += f"Tafsir Lengkap: {tafsir_long[:1000]}...\n"
+                context_data += f"Tafsir Ringkas: {item.get('tafsir')}\n"
+                # Kita potong tafsir panjang biar tidak token limit, tapi cukup panjang buat Riba
+                context_data += f"Tafsir Lengkap: {tafsir_long[:800]}...\n" 
                 context_data += "--------------------------------------------------\n"
 
-        # --- 3. KIRIM KE GROQ (ASYNC) ---
-        # Karena ask_groq_ai sekarang async, kita wajib pakai await
-        ai_response = await ask_groq_ai(user_message, context_data)
+        # --- KIRIM KE GROQ ---
+        # Kita sesuaikan prompt sedikit agar AI lebih fleksibel
+        system_prompt = """
+        Kamu adalah Asisten Islami yang cerdas.
+        1. Gunakan Referensi yang diberikan untuk menjawab.
+        2. Jika Referensi memuat ayat yang diminta (misal Al-Fatihah), JELASKAN dengan detail.
+        3. Jika Referensi kurang pas, kamu BOLEH menggunakan pengetahuan umum Islammu, tapi tetap utamakan data referensi.
+        4. Jawab dengan format Markdown yang rapi.
+        """
         
-        return {"answer_type": "text", "content": ai_response}
+        user_prompt = f"Pertanyaan User: '{user_message}'\n\nData Referensi dari Database:\n{context_data}"
+
+        chat_completion = await client.chat.completions.create(
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ],
+            model="llama-3.3-70b-versatile",
+            temperature=0.5, # Turunkan dikit biar lebih fokus
+            max_tokens=1500,
+        )
+        
+        return {"answer_type": "text", "content": chat_completion.choices[0].message.content}
 
     except Exception as e:
-        print(f"🔥 CRITICAL ERROR di /chatbot: {e}")
-        return {"answer_type": "text", "content": f"Maaf, server mengalami kendala internal: {str(e)}"}
+        print(f"🔥 Error Chatbot: {e}")
+        return {"answer_type": "text", "content": f"Maaf, ada kesalahan teknis: {str(e)}"}
 
 
 @app.get("/debug-path")
