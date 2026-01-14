@@ -3,7 +3,7 @@ import { useSettings } from '../contexts/SettingsContext';
 import { HiXMark } from 'react-icons/hi2';
 
 function SettingsModal({ onClose }) {
-  const { arabicSize, setArabicSize, translationSize, setTranslationSize } = useSettings();
+  const { arabSize, setArabSize, translationSize, setTranslationSize } = useSettings();
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={onClose}>
@@ -21,17 +21,17 @@ function SettingsModal({ onClose }) {
         <div className="mb-6">
           <div className="flex justify-between mb-2">
             <label className="font-semibold text-gray-700">Ukuran Arab</label>
-            <span className="text-sm text-gray-500">{arabicSize}px</span>
+            <span className="text-sm text-gray-500">{arabSize}px</span>
           </div>
           <input 
             type="range" min="24" max="70" step="2"
-            value={arabicSize}
-            onChange={(e) => setArabicSize(parseInt(e.target.value))}
+            value={arabSize}
+            onChange={(e) => setArabSize(parseInt(e.target.value))}
             className="w-full h-2 bg-green-200 rounded-lg appearance-none cursor-pointer accent-green-600"
           />
           {/* Preview */}
           <p className="mt-3 text-right text-gray-800 border p-2 rounded-lg bg-gray-50" 
-             style={{ fontFamily: 'Amiri, serif', fontSize: `${arabicSize}px` }}>
+             style={{ fontFamily: 'Amiri, serif', fontSize: `${arabSize}px` }}>
             بِسْمِ اللّٰهِ
           </p>
         </div>

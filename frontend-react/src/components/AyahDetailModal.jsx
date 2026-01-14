@@ -7,7 +7,7 @@ import FormattedText from './FormattedText';
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
 
 function AyahDetailModal({ data, onClose }) {
-  const { arabicSize, translationSize } = useSettings();
+  const { arabSize, translationSize } = useSettings();
   // const { translationSize } = useSettings();
 
   if (!data) return null;
@@ -53,7 +53,7 @@ function AyahDetailModal({ data, onClose }) {
           {/* 1. Kartu Ayat (Arab & Latin) */}
           <div className="bg-teal-50 p-4 rounded-xl border border-teal-100">
              <div className="mb-4 text-right">
-                <p className="leading-[2.5] text-gray-800" style={{ fontFamily: 'Amiri, serif', fontSize: `${arabicSize}px` }} dir="rtl">
+                <p className="leading-[2.5] text-gray-800" style={{ fontFamily: 'Amiri, serif', fontSize: `${arabSize}px` }} dir="rtl">
                   {data.text.arab}
                 </p>
              </div>
